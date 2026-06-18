@@ -5,12 +5,12 @@ import {
   CardHeader,
   CardFooter,
   CardTitle,
-  CardAction,
   CardContent,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import logo from "../../../public/logo2.png";
 import { Label } from "@/components/ui/label";
+import Link from "next/link";
 
 export function FormLogin() {
   return (
@@ -19,7 +19,7 @@ export function FormLogin() {
         <Image
           alt="logo do app"
           src={logo}
-          quality={100}
+          quality={75}
           priority={true}
           width={0}
           height={0}
@@ -31,6 +31,9 @@ export function FormLogin() {
         className="w-full max-w-md mx-auto 
          border border-borderGren"
       >
+        <CardHeader className="justify-center mt-4 mb-2">
+          <CardTitle>Acesse sua conta</CardTitle>
+        </CardHeader>
         <CardContent>
           <form>
             <div className="flex flex-col gap-2 mb-4">
@@ -54,12 +57,28 @@ export function FormLogin() {
               />
             </div>
             <div>
-               <Button
-                 type="submit"
-                 className="flex w-full "
-               >Entrar</Button> 
+              <Button type="submit" className="flex w-full ">
+                Entrar
+              </Button>
             </div>
           </form>
+          <CardFooter className="flex flex-col gap-2 items-center justify-center mt-2 border-none ">
+            <div className="flex gap-1">
+              <p className="font-semibold">Recuperar minha</p>
+              <Link className="font-bold text-text-blue" href={""}>
+                conta
+              </Link>
+            </div>
+
+            <div>
+              <p className="mb-4 text-base">
+                Não tem uma conta?{" "}
+                <Link className="font-bold text-text-blue hover:text-borderGren" href={"/register"}>
+                  cadastre-se já
+                </Link>
+              </p>
+            </div>
+          </CardFooter>
         </CardContent>
       </Card>
     </main>
