@@ -10,13 +10,13 @@
   --color-primary-light: #DCFCE7;
 
   /* Backgrounds */
-  --color-background: rgba(255, 255, 255, 1);
+  --color-background: rgba(255, 255, 255, 0.92);
   --color-surface: #FFFFFF;
   --color-surface-secondary: #F1F5F9;
 
   /* Text */
   --color-text: #1E293B;
-  --color-text-secondary: #64748B;
+  --color-text-blue: #3F689D;
   --color-text-muted: #94A3B8;
 
   /* Border */
