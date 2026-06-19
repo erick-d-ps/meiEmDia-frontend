@@ -40,6 +40,7 @@ export function FormLogin() {
               <Label>Email</Label>
               <Input
                 className="border border-border "
+                name="email"
                 id="email"
                 type="email"
                 placeholder="email@exemple.com"
@@ -50,6 +51,7 @@ export function FormLogin() {
               <Label>Senha</Label>
               <Input
                 className="border border-border "
+                name="password"
                 id="password"
                 type="password"
                 placeholder="*******"
