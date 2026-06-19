@@ -1,3 +1,7 @@
+"use client"
+
+import { useActionState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,8 +15,19 @@ import { Input } from "@/components/ui/input";
 import logo from "../../../public/logo2.png";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { registerAction } from "@/actions/auth";
 
-export function FormRegiste() {
+export  function FormRegiste() {
+
+const [ state, actionForm, isPending] = useActionState(registerAction, null)
+const router = useRouter()
+
+useEffect(() => {
+  if(state?.success && state.redirectTo){
+    router.replace(state.redirectTo)
+  }
+}, [state, router])
+
   return (
     <main className="flex w-full items-center justify-center flex-col px-4">
       <div className="max-w-3xl">
@@ -35,13 +50,14 @@ export function FormRegiste() {
           <CardTitle>Cadastre sua conta!</CardTitle>
         </CardHeader>
         <CardContent>
-          <form>
+          <form action={actionForm}>
             <div className="flex flex-col gap-2 mb-4">
               <Label>Nome completo</Label>
               <Input
                 className="border border-border "
-                id="email"
-                type="email"
+                name="name"
+                id="name"
+                type="text"
                 placeholder="Nome do usuário..."
                 required
               />
@@ -50,6 +66,7 @@ export function FormRegiste() {
               <Label>Email</Label>
               <Input
                 className="border border-border "
+                name="email"
                 id="email"
                 type="email"
                 placeholder="email@exemple.com..."
@@ -60,6 +77,7 @@ export function FormRegiste() {
               <Label>Senha</Label>
               <Input
                 className="border border-border "
+                name="password"
                 id="password"
                 type="password"
                 placeholder="*******"
@@ -68,7 +86,7 @@ export function FormRegiste() {
             </div>
             <div>
               <Button type="submit" className="flex w-full ">
-                Cadastrar
+                {isPending ? "Criando conta..." : "Criar conta!"}
               </Button>
             </div>
           </form>
