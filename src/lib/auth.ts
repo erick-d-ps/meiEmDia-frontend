@@ -1,4 +1,7 @@
 import { cookies } from "next/headers";
+import { User } from "./types";
+import { apiClient } from "./api";
+import { redirect } from "next/navigation";
 
 const COOKIE_NAME = "token_MeiEmDia";
 
@@ -28,4 +31,33 @@ export async function removeToken(){
     const cookieStore = await cookies();
 
     cookieStore.delete(COOKIE_NAME)
+}
+
+export async function getUser(): Promise<User | null>{
+   try{
+      const token = await getToken()
+
+      if(!token){
+        return null
+      }
+
+      const user = await apiClient<User>("/me", {
+        token: token
+      })
+
+      return user
+   }catch(err){
+     console.log(err)
+     return null
+   }
+}
+
+export async function AuthenticatedUser(){
+   const user = await getUser();
+
+   if(!user){
+     redirect("/login")
+   }
+
+   return user;
 }
