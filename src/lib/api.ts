@@ -40,7 +40,12 @@ export async function apiClient<T>(
       error: "Erro HTTP: " + response.status,
     }));
 
-    throw new Error(error.error ?? "Erro desconhecido");
+    throw new Error(
+      JSON.stringify({
+        message: error.error,
+        status: response.status,
+      }),
+    );
   }
 
   return response.json();
