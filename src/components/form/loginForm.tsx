@@ -1,3 +1,6 @@
+"use client"
+
+import { useActionState, useEffect } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,8 +14,19 @@ import { Input } from "@/components/ui/input";
 import logo from "../../../public/logo2.png";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { loginAction } from "@/actions/auth"
+import { useRouter } from "next/navigation";
 
 export function FormLogin() {
+  const router = useRouter();
+  const [ state, actionLogin, isPending ] = useActionState(loginAction, null)
+
+  useEffect(() => {
+    if(state?.success && state.redirectTo){
+      router.replace(state.redirectTo)
+    }
+  }, [state, router])
+
   return (
     <main className="flex w-full items-center justify-center flex-col px-4">
       <div className="max-w-3xl">
@@ -35,7 +49,7 @@ export function FormLogin() {
           <CardTitle>Acesse sua conta</CardTitle>
         </CardHeader>
         <CardContent>
-          <form>
+          <form action={actionLogin}>
             <div className="flex flex-col gap-2 mb-4">
               <Label>Email</Label>
               <Input
@@ -60,9 +74,14 @@ export function FormLogin() {
             </div>
             <div>
               <Button type="submit" className="flex w-full ">
-                Entrar
+                {isPending ? "Entrando" : "Entrar"}
               </Button>
             </div>
+            {state?.error &&(
+              <div className="text-sm text-red-500 bg-red-50 p-3 rounded-md">
+                {state.error}
+              </div>
+            )}
           </form>
           <CardFooter className="flex flex-col gap-2 items-center justify-center mt-2 border-none ">
             <div className="flex gap-1">
