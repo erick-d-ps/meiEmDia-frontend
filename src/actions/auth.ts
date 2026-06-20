@@ -2,62 +2,85 @@
 
 import { apiClient } from "@/lib/api";
 import { setToken } from "@/lib/auth";
-import { AuthUser } from "@/lib/types"
+import { AuthUser } from "@/lib/types";
 
 export async function registerAction(
-    prevState: { success: boolean; error: string; redirecTo?: string } | null,
-    formData: FormData
+  prevState: { success: boolean; error: string; redirecTo?: string } | null,
+  formData: FormData,
 ) {
   try {
     const email = formData.get("email") as string;
     const name = formData.get("name") as string;
-    const password = formData.get("password") as string
+    const password = formData.get("password") as string;
 
-    const data ={
+    const data = {
       email: email,
       name: name,
-      password: password  
-    }
+      password: password,
+    };
 
-   const response = await apiClient("/user", {
+    const response = await apiClient("/user", {
       method: "POST",
-      body: JSON.stringify(data)  
-    })
+      body: JSON.stringify(data),
+    });
 
-    console.log(response)
-
-    return {success: true, error: "", redirectTo: "/login"}
-
+    return { success: true, error: "", redirectTo: "/login" };
   } catch (err) {
-    if(err instanceof Error){
-       return{ success: false, error: err.message }; 
+    if (err instanceof Error) {
+      return { success: false, error: err.message };
     }
-    return{ success: false, error: "Erro ao criar a conta!"}
+    return { success: false, error: "Erro ao criar a conta!" };
   }
 }
 
 export async function loginAction(
-   prevState: { success: boolean; error: string; redirecTo?: string } | null,
-    formData: FormData
-){
-  try{
+  prevState: { success: boolean; error: string; redirecTo?: string } | null,
+  formData: FormData,
+) {
+  try {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
     const data = {
       email: email,
-      password: password
-    }
+      password: password,
+    };
 
     const auth = apiClient<AuthUser>("/session", {
       method: "POST",
-      body: JSON.stringify(data)
-    })
+      body: JSON.stringify(data),
+    });
 
-    const authData = await auth
+    
+    const authData = await auth;
+    
+    console.log(authData.name);
 
-    await setToken(authData.token)
-  }catch(err){
+    await setToken(authData.token);
 
+    return { success: true, error: "", redirectTo: "/dashboard" };
+  } catch (err) {
+    if (err instanceof Error) {
+      const error = JSON.parse(err.message);
+
+      if (error.status === 401) {
+        return {
+          success: false,
+          error: "Email ou senha inválidos",
+        };
+      }
+
+      if (error.status === 400) {
+        return {
+          success: false,
+          error: "Dados inválidos",
+        };
+      }
+    }
+
+    return {
+      success: false,
+      error: "Erro ao fazer login",
+    };
   }
 }
