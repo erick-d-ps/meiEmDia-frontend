@@ -1,5 +1,5 @@
 import { AuthenticatedUser } from "@/lib/auth";
-import { Sidebar } from "./components/sidbar";
+import { Sidebar } from "./components/sidebar";
 
 export default async function DashboardLayout({
   children,
