@@ -10,7 +10,8 @@
   --color-primary-light: #DCFCE7;
 
   /* Backgrounds */
-  --color-background: rgba(255, 255, 255, 0.92);
+  --color-background: #f1f1f1;
+  --color-sidebar:  #DDE1E6
   --color-surface: #FFFFFF;
   --color-surface-secondary: #F1F5F9;
 
@@ -20,7 +21,7 @@
   --color-text-muted: #94A3B8;
 
   /* Border */
-  --color-border: #E2E8F0;
+  --color-border: #D1D5DB;
   --color-borderGren: #6DC46D;
 
   /* Status */
