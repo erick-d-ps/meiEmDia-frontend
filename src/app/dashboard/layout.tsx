@@ -1,5 +1,7 @@
 import { AuthenticatedUser } from "@/lib/auth";
 import { Sidebar } from "./components/sidebar";
+import { MobileSidebar } from "./components/mobileSidebar";
+import { Header } from "./components/header";
 
 export default async function DashboardLayout({
   children,
@@ -11,12 +13,14 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-      <Sidebar/>{/*Desctop*/}
-      <div>
+      <Sidebar />
+      {/*Desctop*/}
+      <div className="flex flex-1 flex-col ">
+        {/*Mobile sidebar*/}
+        <MobileSidebar userName={user.name} />
         <main className="flex-1 overflow-y-auto">
-          <div className="container max-w-full px-4 py-6">
-            {children}
-          </div>
+          <Header userName={user.name} />
+          <div className="container max-w-full px-4 py-6">{children}</div>
         </main>
       </div>
     </div>
