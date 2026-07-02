@@ -31,10 +31,11 @@ Documento tecnico do frontend do projeto `mei-em-dia`, baseado no codigo atual d
 - `src/components/`
   - `form/`: formularios de login e cadastro.
   - `ui/`: componentes reutilizaveis de interface baseados em Shadcn/Radix.
+  - `month-selector.tsx`: seletor de mes/ano usado em dashboard desktop e mobile.
 - `src/lib/`
   - Funcoes de autenticacao, cliente de API, tipos e utilitarios.
 - `public/`
-  - Arquivos estaticos como logos e SVGs.
+  - Arquivos estaticos como logos e imagens.
 
 ## Rotas Implementadas
 
@@ -50,6 +51,12 @@ Documento tecnico do frontend do projeto `mei-em-dia`, baseado no codigo atual d
 - `/dashboard`
   - Arquivos: `src/app/dashboard/layout.tsx` e `src/app/dashboard/page.tsx`
   - Area protegida. O layout valida a sessao antes de renderizar os filhos.
+- `/dashboard/monthlyHistory`
+  - Arquivo: `src/app/dashboard/monthlyHistory/page.tsx`
+  - Pagina de historico de meses acessivel pelo dashboard.
+- `/dashboard/reports`
+  - Arquivo: `src/app/dashboard/reports/page.tsx`
+  - Pagina de relatorios acessivel pelo dashboard.
 
 ## Componentes
 
@@ -65,6 +72,34 @@ Documento tecnico do frontend do projeto `mei-em-dia`, baseado no codigo atual d
   - Componente client.
   - Usa `useActionState(registerAction, null)`.
   - Ao receber `state.success` com `redirectTo`, executa `router.replace(...)`.
+
+### Componentes de Dashboard
+
+- `Sidebar`
+  - Arquivo: `src/app/dashboard/components/sidebar.tsx`
+  - Componente client para desktop.
+  - Contem links para `Inicio`, `Histórico de meses`, `Relatórios` e `Configuração`.
+  - Inclui botao de logout que envia o form para `logoutAction`.
+- `MobileSidebar`
+  - Arquivo: `src/app/dashboard/components/mobileSidebar.tsx`
+  - Componente client para mobile.
+  - Usa `Sheet` para abrir o menu lateral.
+  - Exibe saudacao com o `userName` logado.
+  - Inclui `MonthSelector` e os mesmos itens de menu do sidebar desktop.
+- `Header`
+  - Arquivo: `src/app/dashboard/components/header.tsx`
+  - Componente client exibido apenas em desktop.
+  - Contem o `MonthSelector` e a saudacao `Olá, {userName}`.
+- `InfoMei`
+  - Arquivo: `src/app/dashboard/components/infoMei.tsx`
+  - Renderiza um cartão com o logo do app e mensagem de status do mês.
+- `HistoryButton`
+  - Arquivo: `src/app/dashboard/components/historyButton.tsx`
+  - Renderiza dois botões de ação: `Ver relatório mensal` e `Histórico do mês`.
+- `MonthSelector`
+  - Arquivo: `src/components/month-selector.tsx`
+  - Componente client que abre um `Popover` com um `Calendar`.
+  - Permite escolher mes/ano e atualizar o estado de seleção.
 
 ### Componentes de UI
 
@@ -94,14 +129,17 @@ Arquivo: `src/actions/auth.ts`
 - `registerAction`
   - Recebe `name`, `email` e `password` via `FormData`.
   - Faz `POST /user` usando `apiClient`.
-  - Em sucesso, retorna `{ success: true, redirectTo: "/login" }`.
+  - Em sucesso, retorna `{ success: true, error: "", redirectTo: "/login" }`.
   - Em erro, retorna `{ success: false, error: ... }`.
 - `loginAction`
   - Recebe `email` e `password` via `FormData`.
   - Faz `POST /session` usando `apiClient`.
   - Salva o token no cookie por meio de `setToken(authData.token)`.
-  - Em sucesso, retorna `{ success: true, redirectTo: "/dashboard" }`.
+  - Em sucesso, retorna `{ success: true, error: "", redirectTo: "/dashboard" }`.
   - Em erro, trata especialmente status `401` e `400`.
+- `logoutAction`
+  - Remove o cookie de autenticacao via `removeToken()`.
+  - Redireciona para `/login`.
 
 ## Sistema de Autenticacao
 
@@ -163,18 +201,19 @@ Arquivo: `src/app/dashboard/layout.tsx`
 Responsabilidades atuais:
 
 - validar autenticacao antes de renderizar o dashboard
-- envolver as paginas filhas com a estrutura base:
-
-```tsx
-<div>
-  <main>{children}</main>
-</div>
-```
+- envolver as paginas filhas com a estrutura base do dashboard
+- renderizar o `Sidebar` no desktop e o `MobileSidebar` no mobile
+- renderizar o `Header` em desktop
+- passar `user.name` ao `MobileSidebar` para exibicao da saudacao
 
 Observacoes:
 
-- o valor retornado por `AuthenticatedUser()` e armazenado em `user`, mas hoje nao e usado no JSX
-- o layout ainda esta simples, sem sidebar, header ou contexto global do painel
+- o layout agora inclui `Sidebar`, `MobileSidebar` e `Header`.
+- `user` e retornado por `AuthenticatedUser()` e usado no header mobile.
+- `Header` e exibido no desktop e inclui `MonthSelector`.
+- `MobileSidebar` exibe um menu `Sheet`, o `MonthSelector` e o nome do usuario.
+- o `Sidebar` desktop e o `MobileSidebar` mobile contem links para as paginas do dashboard.
+- existe um link de configuracao no sidebar, mas a rota `/dashboard/settings` nao esta presente no workspace atual.
 
 ## Como Funciona o Redirect para Login
 
@@ -267,7 +306,8 @@ Observacao importante:
 
 ## Observacoes Gerais do Estado Atual
 
-- Nao ha logout implementado na interface, embora exista a funcao `removeToken()` em `src/lib/auth.ts`.
+- Logout esta implementado e integrado ao sidebar do dashboard via `logoutAction`.
 - Nao ha middleware global para autenticacao.
-- O dashboard atual ainda e minimo e renderiza apenas o texto `PAGINA DASBOARD`.
+- O dashboard agora inclui sidebar desktop e mobile, mas ainda e funcionalmente basico.
+- O dashboard desktop e mobile compartilham links para `Inicio`, `Histórico de meses` e `Relatórios`.
 - O metadata global em `src/app/layout.tsx` ainda esta com os valores padrao do Create Next App.
