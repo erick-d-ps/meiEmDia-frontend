@@ -37,8 +37,8 @@ export function Sidebar() {
   const pathName = usePathname();
 
   return (
-    <aside className="hidden lg:flex flex-col h-screen w-64 border-r border-border bg-sidebar">
-      <div className="border-b border-border p-6">
+    <aside className="hidden lg:flex flex-col h-screen w-64 border-r border-border bg-surface">
+      <div className=" p-6">
         <Image
           alt="logo do app"
           src={logo}
@@ -63,7 +63,7 @@ export function Sidebar() {
                   : "text-gray-700 hover:bg-gray-200 hover:text-black",
               )}
             >
-              <Icon className="w-5 h5" />
+              <Icon className="w-5 h-5" />
               {menu.title}
             </Link>
           );
