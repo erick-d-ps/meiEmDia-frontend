@@ -2,7 +2,7 @@
 
 import { Home, Calendar, ScrollText, BoltIcon, LogOut } from "lucide-react";
 import Image from "next/image";
-import logo from "../../../../public/logo2.png";
+import logo from "../../../public/logo2.png";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";

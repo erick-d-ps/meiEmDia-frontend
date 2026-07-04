@@ -1,6 +1,6 @@
 import { ChartNoAxesColumnIncreasing } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import logo from "../../../../public/logo2.png";
+import logo from "../../../public/logo2.png";
 import Image from "next/image";
 
 export function MeiStatus() {
