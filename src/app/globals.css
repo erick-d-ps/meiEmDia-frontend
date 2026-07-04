@@ -15,11 +15,15 @@
   --color-sidebar:  #DDE1E6;
   --color-surface: #FFFFFF;
   --color-surface-secondary: #F1F5F9;
+  --color-button-gray: #878787;
+  --color-button-green: #008F1A;
+  --color-alert: #FFFABF;
 
   /* Text */
   --color-text: #1E293B;
   --color-text-blue: #3F689D;
   --color-text-muted: #94A3B8;
+  --color-text-white: #FFF;
 
   /* Border */
   --color-border: #D1D5DB;
