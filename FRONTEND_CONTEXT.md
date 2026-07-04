@@ -41,16 +41,19 @@ Documento tecnico do frontend do projeto `mei-em-dia`, baseado no codigo atual d
 
 - `/`
   - Arquivo: `src/app/page.tsx`
-  - Faz redirecionamento imediato para `/login` com `redirect("/login")`.
+  - Verifica se ja existe usuario autenticado com `getUser()` antes de decidir o destino.
+  - Redireciona para `/dashboard` quando ha sessao valida e para `/login` quando nao ha.
 - `/login`
   - Arquivo: `src/app/(public)/login/page.tsx`
   - Pagina publica que renderiza o componente `FormLogin`.
+  - Tambem valida a sessao atual e redireciona para o dashboard se o usuario ja estiver autenticado.
 - `/register`
   - Arquivo: `src/app/(public)/register/page.tsx`
   - Pagina publica que renderiza o componente `FormRegiste`.
 - `/dashboard`
   - Arquivos: `src/app/dashboard/layout.tsx` e `src/app/dashboard/page.tsx`
   - Area protegida. O layout valida a sessao antes de renderizar os filhos.
+  - A pagina principal do dashboard compoe os componentes de status, lancamentos e atalhos.
 - `/dashboard/monthlyHistory`
   - Arquivo: `src/app/dashboard/monthlyHistory/page.tsx`
   - Pagina de historico de meses acessivel pelo dashboard.
@@ -90,12 +93,18 @@ Documento tecnico do frontend do projeto `mei-em-dia`, baseado no codigo atual d
   - Arquivo: `src/app/dashboard/components/header.tsx`
   - Componente client exibido apenas em desktop.
   - Contem o `MonthSelector` e a saudacao `Olá, {userName}`.
-- `InfoMei`
-  - Arquivo: `src/app/dashboard/components/infoMei.tsx`
-  - Renderiza um cartão com o logo do app e mensagem de status do mês.
+- `MeiStatus`
+  - Arquivo: `src/app/dashboard/components/meiStatus.tsx`
+  - Renderiza o painel inicial com logo e mensagem de status do mes.
+- `RecordInvoices`
+  - Arquivo: `src/app/dashboard/components/recordInvoices.tsx`
+  - Exibe resumo de receita do mes, quantidade de lancamentos, atividades (serviços e vendas) e botoes de acao para adicionar receita.
 - `HistoryButton`
   - Arquivo: `src/app/dashboard/components/historyButton.tsx`
-  - Renderiza dois botões de ação: `Ver relatório mensal` e `Histórico do mês`.
+  - Renderiza dois botoes de acao: `Ver relatório mensal` e `Histórico do mês`.
+- `AlertMessage`
+  - Arquivo: `src/app/dashboard/components/alertMessage.tsx`
+  - Exibe um banner de alerta lembrete para o dia de fechamento/lançamento.
 - `MonthSelector`
   - Arquivo: `src/components/month-selector.tsx`
   - Componente client que abre um `Popover` com um `Calendar`.
@@ -217,14 +226,15 @@ Observacoes:
 
 ## Como Funciona o Redirect para Login
 
-Ha tres fluxos de redirect relacionados ao login:
+Ha tres fluxos principais de redirect relacionados ao login:
 
 ### 1. Redirect automatico ao acessar a raiz
 
 Arquivo: `src/app/page.tsx`
 
-- a rota `/` executa `redirect("/login")`
-- isso faz a aplicacao abrir diretamente a tela de login
+- a rota `/` consulta `getUser()` antes de decidir o destino
+- se houver usuario autenticado, envia para `/dashboard`
+- se nao houver, envia para `/login`
 
 ### 2. Redirect quando o usuario nao esta autenticado
 
