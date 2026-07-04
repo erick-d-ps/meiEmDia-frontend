@@ -3,9 +3,9 @@ import { Button } from "@/components/ui/button";
 import logo from "../../../../public/logo2.png";
 import Image from "next/image";
 
-export function InfoMei() {
+export function MeiStatus() {
   return (
-    <main className="flex flex-col mx-auto ">
+    <main className="flex flex-col top-0">
       <section className="w-full border flex flex-col items-center justify-center bg-bgGreen h-32 rounded-md border-border">
         <div className=" flex items-center justify-center mb-4">
           <Image
