@@ -12,8 +12,8 @@ export function Header({ userName }: HeaderProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   return (
-    <header className="hidden lg:flex overflow-hidden bg-background">
-      <div className="w-full h-18 border-b border-border px-8 flex justify-between items-center">
+    <header className="hidden lg:flex overflow-hidden bg-background border-b border-border">
+      <div className="w-full max-w-7xl mx-auto h-18 px-4 flex justify-between items-center">
         <MonthSelector
           date={selectedDate}
           onChange={(date) => {
