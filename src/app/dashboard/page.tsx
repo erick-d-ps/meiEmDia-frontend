@@ -1,17 +1,22 @@
-import { InfoMei } from "./components/infoMei";
+import { MeiStatus } from "./components/meiStatus";
 import { HistoryButton } from "./components/historyButton";
+import { RecordInvoices } from "./components/recordInvoices"
+import { AlertMessage } from "./components/alertMessage";
 
 export default function Dashboard() {
   return (
-    <main className="min-h-screen bg-background p-4 sm:p-6">
-      <section className="flex items-center flex-col sm:flex-row justify-between gap-2">
+    <main className="w-full mx-auto max-w-7xl justify-center items-center bg-background ">
+      <section className="flex items-center flex-col xl:flex-row justify-between gap-2">
         <div className="flex-1 w-full p-4">
-          <InfoMei />
+          <MeiStatus />
         </div>
-        <div className=" flex-1 w-full p-4"></div>
+        <div className=" flex-1 w-full p-4">
+          <RecordInvoices/> 
+        </div>
       </section>
-      <footer className="flex items-center flex-col sm:flex-row justify-between gap-2">
+      <footer className="flex flex-1 items-center flex-col  justify-between">
         <HistoryButton />
+        <AlertMessage />
       </footer>
     </main>
   );
