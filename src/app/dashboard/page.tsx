@@ -1,7 +1,7 @@
-import { MeiStatus } from "./components/meiStatus";
-import { HistoryButton } from "./components/historyButton";
-import { RecordInvoices } from "./components/recordInvoices"
-import { AlertMessage } from "./components/alertMessage";
+import { MeiStatus } from "../../components/dashboard/meiStatus";
+import { HistoryButton } from "../../components/dashboard/historyButton";
+import { RecordInvoices } from "../../components/dashboard/recordInvoices"
+import { AlertMessage } from "../../components/dashboard/alertMessage";
 
 export default function Dashboard() {
   return (

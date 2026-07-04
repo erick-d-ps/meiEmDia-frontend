@@ -1,7 +1,7 @@
 import { AuthenticatedUser } from "@/lib/auth";
-import { Sidebar } from "./components/sidebar";
-import { MobileSidebar } from "./components/mobileSidebar";
-import { Header } from "./components/header";
+import { Sidebar } from "../../components/dashboard/sidebar";
+import { MobileSidebar } from "../../components/dashboard/mobileSidebar";
+import { Header } from "../../components/dashboard/header";
 
 export default async function DashboardLayout({
   children,
