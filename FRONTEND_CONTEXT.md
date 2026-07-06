@@ -30,6 +30,7 @@ Documento tecnico do frontend do projeto `mei-em-dia`, baseado no codigo atual d
   - Contem Server Actions relacionadas a autenticacao.
 - `src/components/`
   - `form/`: formularios de login e cadastro.
+  - `dashboard/`: componentes visuais do dashboard, como sidebar, header, menu mobile e blocos de status.
   - `ui/`: componentes reutilizaveis de interface baseados em Shadcn/Radix.
   - `month-selector.tsx`: seletor de mes/ano usado em dashboard desktop e mobile.
 - `src/lib/`
@@ -49,17 +50,23 @@ Documento tecnico do frontend do projeto `mei-em-dia`, baseado no codigo atual d
   - Tambem valida a sessao atual e redireciona para o dashboard se o usuario ja estiver autenticado.
 - `/register`
   - Arquivo: `src/app/(public)/register/page.tsx`
-  - Pagina publica que renderiza o componente `FormRegiste`.
+  - Pagina publica que renderiza o componente `FormRegister`.
 - `/dashboard`
   - Arquivos: `src/app/dashboard/layout.tsx` e `src/app/dashboard/page.tsx`
   - Area protegida. O layout valida a sessao antes de renderizar os filhos.
-  - A pagina principal do dashboard compoe os componentes de status, lancamentos e atalhos.
+  - A pagina principal do dashboard compoe componentes de status, lancamentos e atalhos.
 - `/dashboard/monthlyHistory`
   - Arquivo: `src/app/dashboard/monthlyHistory/page.tsx`
-  - Pagina de historico de meses acessivel pelo dashboard.
+  - Pagina base para o historico de meses.
 - `/dashboard/reports`
   - Arquivo: `src/app/dashboard/reports/page.tsx`
-  - Pagina de relatorios acessivel pelo dashboard.
+  - Pagina base para relatorios.
+- `/dashboard/settings`
+  - Arquivo: `src/app/dashboard/settings/page.tsx`
+  - Tela de configuracoes com cards de acesso rapido e uma zona de perigo para exclusao da conta.
+- `/dashboard/mei-data`
+  - Arquivo: `src/app/dashboard/mei-data/page.tsx`
+  - Pagina inicial para dados do MEI.
 
 ## Componentes
 
@@ -70,7 +77,7 @@ Documento tecnico do frontend do projeto `mei-em-dia`, baseado no codigo atual d
   - Componente client.
   - Usa `useActionState(loginAction, null)`.
   - Ao receber `state.success` com `redirectTo`, executa `router.replace(...)`.
-- `FormRegiste`
+- `FormRegister`
   - Arquivo: `src/components/form/registerForm.tsx`
   - Componente client.
   - Usa `useActionState(registerAction, null)`.
@@ -79,36 +86,28 @@ Documento tecnico do frontend do projeto `mei-em-dia`, baseado no codigo atual d
 ### Componentes de Dashboard
 
 - `Sidebar`
-  - Arquivo: `src/app/dashboard/components/sidebar.tsx`
+  - Arquivo: `src/components/dashboard/sidebar.tsx`
   - Componente client para desktop.
-  - Contem links para `Inicio`, `Histórico de meses`, `Relatórios` e `Configuração`.
-  - Inclui botao de logout que envia o form para `logoutAction`.
+  - Exibe menu lateral com links para `Inicio`, `Histórico de meses`, `Relatórios` e `Configurações`.
+  - Usa `usePathname()` para destacar a rota ativa.
+  - Inclui botao de logout com `logoutAction`.
 - `MobileSidebar`
-  - Arquivo: `src/app/dashboard/components/mobileSidebar.tsx`
+  - Arquivo: `src/components/dashboard/mobileSidebar.tsx`
   - Componente client para mobile.
   - Usa `Sheet` para abrir o menu lateral.
   - Exibe saudacao com o `userName` logado.
-  - Inclui `MonthSelector` e os mesmos itens de menu do sidebar desktop.
+  - Inclui `MonthSelector` e links para as paginas do dashboard.
 - `Header`
-  - Arquivo: `src/app/dashboard/components/header.tsx`
+  - Arquivo: `src/components/dashboard/header.tsx`
   - Componente client exibido apenas em desktop.
   - Contem o `MonthSelector` e a saudacao `Olá, {userName}`.
-- `MeiStatus`
-  - Arquivo: `src/app/dashboard/components/meiStatus.tsx`
-  - Renderiza o painel inicial com logo e mensagem de status do mes.
-- `RecordInvoices`
-  - Arquivo: `src/app/dashboard/components/recordInvoices.tsx`
-  - Exibe resumo de receita do mes, quantidade de lancamentos, atividades (serviços e vendas) e botoes de acao para adicionar receita.
-- `HistoryButton`
-  - Arquivo: `src/app/dashboard/components/historyButton.tsx`
-  - Renderiza dois botoes de acao: `Ver relatório mensal` e `Histórico do mês`.
-- `AlertMessage`
-  - Arquivo: `src/app/dashboard/components/alertMessage.tsx`
-  - Exibe um banner de alerta lembrete para o dia de fechamento/lançamento.
 - `MonthSelector`
   - Arquivo: `src/components/month-selector.tsx`
   - Componente client que abre um `Popover` com um `Calendar`.
   - Permite escolher mes/ano e atualizar o estado de seleção.
+- `Settings` (pagina)
+  - Arquivo: `src/app/dashboard/settings/page.tsx`
+  - Implementa a tela de configuracoes com cards navegaveis e uma secao de exclusao da conta.
 
 ### Componentes de UI
 
@@ -213,16 +212,16 @@ Responsabilidades atuais:
 - envolver as paginas filhas com a estrutura base do dashboard
 - renderizar o `Sidebar` no desktop e o `MobileSidebar` no mobile
 - renderizar o `Header` em desktop
-- passar `user.name` ao `MobileSidebar` para exibicao da saudacao
+- passar `user.name` ao `MobileSidebar` e ao `Header` para exibicao da saudacao
 
 Observacoes:
 
-- o layout agora inclui `Sidebar`, `MobileSidebar` e `Header`.
-- `user` e retornado por `AuthenticatedUser()` e usado no header mobile.
-- `Header` e exibido no desktop e inclui `MonthSelector`.
+- o layout inclui `Sidebar`, `MobileSidebar` e `Header`.
+- `user` e retornado por `AuthenticatedUser()` e usado no header mobile e desktop.
+- `Header` e exibido apenas em telas maiores e inclui `MonthSelector`.
 - `MobileSidebar` exibe um menu `Sheet`, o `MonthSelector` e o nome do usuario.
 - o `Sidebar` desktop e o `MobileSidebar` mobile contem links para as paginas do dashboard.
-- existe um link de configuracao no sidebar, mas a rota `/dashboard/settings` nao esta presente no workspace atual.
+- a rota `/dashboard/settings` ja esta implementada e acessivel pelo menu.
 
 ## Como Funciona o Redirect para Login
 
@@ -316,8 +315,8 @@ Observacao importante:
 
 ## Observacoes Gerais do Estado Atual
 
-- Logout esta implementado e integrado ao sidebar do dashboard via `logoutAction`.
+- Logout esta implementado e integrado ao menu do dashboard via `logoutAction`.
 - Nao ha middleware global para autenticacao.
-- O dashboard agora inclui sidebar desktop e mobile, mas ainda e funcionalmente basico.
-- O dashboard desktop e mobile compartilham links para `Inicio`, `Histórico de meses` e `Relatórios`.
+- O dashboard agora inclui sidebar desktop e mobile, alem de uma tela de configuracoes acessivel via menu.
+- As paginas `/dashboard/monthlyHistory`, `/dashboard/reports`, `/dashboard/settings` e `/dashboard/mei-data` existem no projeto, embora algumas ainda estejam em fase inicial.
 - O metadata global em `src/app/layout.tsx` ainda esta com os valores padrao do Create Next App.
