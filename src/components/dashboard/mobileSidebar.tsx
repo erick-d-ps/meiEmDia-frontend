@@ -54,8 +54,8 @@ export function MobileSidebar({ userName }: SidbarProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   return (
-    <div className="lg:hidden">
-      <header className="sticky top-0 z-50 bg-surface border-b border-border">
+    <div className="sticky top-0 z-50 lg:hidden">
+      <header className="bg-surface border-b border-border">
         <div className="flex h-16 items-center justify-between px-4">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
@@ -85,7 +85,7 @@ export function MobileSidebar({ userName }: SidbarProps) {
                           : "text-gray-700 hover:bg-gray-200 hover:text-black",
                       )}
                     >
-                      <Icon className="w-5 h5" />
+                      <Icon className="w-5 h-5" />
                       {menu.title}
                     </Link>
                   );
@@ -94,7 +94,7 @@ export function MobileSidebar({ userName }: SidbarProps) {
               </nav>
               <SheetFooter>
                 <footer className="absolute bottom-4">
-                  <div className="fex ">
+                  <div className="flex ">
                     <Link
                       href={"/dashboard/settings"}
                       className={cn(

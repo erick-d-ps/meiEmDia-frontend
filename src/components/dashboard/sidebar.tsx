@@ -31,6 +31,11 @@ const menuItens = [
     href: "/dashboard/reports",
     icon: ScrollText,
   },
+  {
+    title: "Configurações",
+    href: "/dashboard/settings",
+    icon: BoltIcon,
+  }
 ];
 
 export function Sidebar() {
@@ -69,17 +74,7 @@ export function Sidebar() {
           );
         })}
         <footer className="absolute bottom-4">
-          <div className="fex ">
-            <Link
-              href={"/dashboard/settings"}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 text-gray-700 hover:bg-gray-200 hover:text-black",
-              )}
-            >
-              <BoltIcon />
-              Configuração
-            </Link>
-          </div>
+          
           <form action={logoutAction}>
             <Button
               type="submit"
