@@ -20,7 +20,7 @@ export async function registerAction(
       password: password,
     };
 
-    const response = await apiClient("/user", {
+     await apiClient("/user", {
       method: "POST",
       body: JSON.stringify(data),
     });
