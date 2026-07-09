@@ -1,7 +1,10 @@
 "use client";
 
+import { useActionState, useState } from "react";
 import { Building2, Save, UserRound } from "lucide-react";
 
+import { saveMeiAction } from "@/actions/mei";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +17,9 @@ import {
 } from "@/components/ui/select";
 
 export function MeiDataForm() {
+  const [state, formAction, isPending] = useActionState(saveMeiAction, null);
+  const [hasAccountant, setHasAccountant] = useState<string | undefined>();
+
   return (
     <main className="p-4">
       <section className="mx-auto max-w-7xl">
@@ -22,12 +28,12 @@ export function MeiDataForm() {
             <h1 className="text-2xl font-bold md:text-3xl">Dados do seu MEI</h1>
 
             <p className="mt-2 text-sm md:text-base">
-              Mantenha suas informações atualizadas para calcular seus limites e
-              gerar relatórios com precisão.
+              Mantenha suas informacoes atualizadas para calcular seus limites e
+              gerar relatorios com precisao.
             </p>
           </div>
 
-          <form className="space-y-8">
+          <form action={formAction} className="space-y-8">
             <div className="grid gap-8 lg:grid-cols-2">
               <section>
                 <div className="mb-5 flex items-center gap-3 border-b border-borderGren pb-3">
@@ -47,42 +53,41 @@ export function MeiDataForm() {
                       className="border-border"
                       name="cnpj"
                       id="cnpj"
+                      inputMode="numeric"
                       placeholder="00.000.000/0000-00"
                       required
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="companyName">Razão social</Label>
+                    <Label htmlFor="companyName">Razao social</Label>
                     <Input
                       className="border-border"
                       id="companyName"
                       name="companyName"
-                      placeholder="Digite a razão social"
+                      placeholder="Digite a razao social"
                       required
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="fantasyName">
-                      Nome fantasia{" "}
-                      <span className="text-muted-foreground">(opcional)</span>
-                    </Label>
+                    <Label htmlFor="companyName">Nome Fantasia (opcional)</Label>
                     <Input
                       className="border-border"
                       id="fantasyName"
-                      name="fantazyName"
+                      name="fantasyName"
                       placeholder="Digite o nome fantasia"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="cnae">CNAE principal</Label>
+                    <Label htmlFor="mainActivityCNAE">CNAE principal</Label>
                     <Input
                       className="border-border"
-                      name="cnae"
-                      id="cnae"
-                      placeholder="Digite o código ou descrição do CNAE"
+                      name="mainActivityCNAE"
+                      id="mainActivityCNAE"
+                      inputMode="numeric"
+                      placeholder="Ex.: 6201501"
                       required
                     />
                   </div>
@@ -100,12 +105,13 @@ export function MeiDataForm() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="city">Estado</Label>
+                      <Label htmlFor="state">Estado</Label>
                       <Input
                         className="border-border"
                         name="state"
                         id="state"
-                        placeholder="Digite seu Estado"
+                        maxLength={2}
+                        placeholder="Ex.: SP"
                         required
                       />
                     </div>
@@ -120,7 +126,7 @@ export function MeiDataForm() {
                   </div>
 
                   <h2 className="font-semibold text-primary">
-                    Responsável e atividade
+                    Responsavel e atividade
                   </h2>
                 </div>
 
@@ -142,6 +148,7 @@ export function MeiDataForm() {
                       className="border-border"
                       name="cpf"
                       id="cpf"
+                      inputMode="numeric"
                       placeholder="000.000.000-00"
                       required
                     />
@@ -149,16 +156,14 @@ export function MeiDataForm() {
 
                   <div className="space-y-2">
                     <Label>Tipo de atividade</Label>
-                    <Select 
-                      name="activityType"
-                    >
+                    <Select name="activityType" required>
                       <SelectTrigger className="w-full border-border">
                         <SelectValue placeholder="Selecione o tipo de atividade" />
                       </SelectTrigger>
 
                       <SelectContent className="bg-white">
-                        <SelectItem value="SERVICO">Serviço</SelectItem>
-                        <SelectItem value="COMERCIO">Comércio</SelectItem>
+                        <SelectItem value="SERVICO">Servico</SelectItem>
+                        <SelectItem value="COMERCIO">Comercio</SelectItem>
                         <SelectItem value="MISTO">Misto</SelectItem>
                       </SelectContent>
                     </Select>
@@ -166,70 +171,45 @@ export function MeiDataForm() {
 
                   <div className="space-y-2">
                     <Label>Possui contador?</Label>
-                    <Select name="accountant">
+                    <Select
+                      name="hasAccountant"
+                      required
+                      value={hasAccountant}
+                      onValueChange={setHasAccountant}
+                    >
                       <SelectTrigger className="w-full border-border">
                         <SelectValue placeholder="Selecione" />
                       </SelectTrigger>
 
                       <SelectContent className="bg-white">
                         <SelectItem value="true">Sim</SelectItem>
-                        <SelectItem value="false">Não</SelectItem>
+                        <SelectItem value="false">Nao</SelectItem>
                       </SelectContent>
                     </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="accountantName">
-                      Nome do contador{" "}
-                      <span className="text-muted-foreground">(opcional)</span>
-                    </Label>
-                    <Input
-                      className="border-border"
-                      name="accountantName"
-                      id="accountantName"
-                      placeholder="Digite o nome do contador"
-                    />
-                  </div>
-
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="accountantEmail">
-                        E-mail do contador{" "}
-                        <span className="text-muted-foreground">
-                          (opcional)
-                        </span>
-                      </Label>
-                      <Input
-                        className="border-border"
-                        name="accountantEmail"
-                        id="accountantEmail"
-                        type="email"
-                        placeholder="exemplo@email.com"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="accountantPhone">
-                        Telefone{" "}
-                        <span className="text-muted-foreground">
-                          (opcional)
-                        </span>
-                      </Label>
-                      <Input
-                        className="border-border"
-                        name="accountantPhone"
-                        id="accountantPhone"
-                        placeholder="(00) 00000-0000"
-                      />
-                    </div>
                   </div>
                 </div>
               </section>
             </div>
 
-            <Button type="submit" className="w-full gap-2 text-white">
+            {state?.error ? (
+              <Alert variant="destructive">
+                <AlertDescription>{state.error}</AlertDescription>
+              </Alert>
+            ) : null}
+
+            {state?.success && state.message ? (
+              <Alert>
+                <AlertDescription>{state.message}</AlertDescription>
+              </Alert>
+            ) : null}
+
+            <Button
+              type="submit"
+              className="w-full gap-2 text-white"
+              disabled={isPending}
+            >
               <Save className="h-4 w-4 text-white" />
-              Salvar informações
+              {isPending ? "Salvando..." : "Salvar informacoes"}
             </Button>
           </form>
         </div>
