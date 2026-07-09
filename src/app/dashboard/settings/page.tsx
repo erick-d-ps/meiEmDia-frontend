@@ -53,7 +53,7 @@ const settingsItems = [
 
 export default function Settings() {
   return (
-    <main className="mx-auto w-full max-w-7xl p-4">
+    <main className="mx-auto max-h-screen w-full max-w-7xl p-4">
       <header className="mb-8">
         <h1 className="text-4xl font-bold">Configurações</h1>
         <p className="text-text-gray">

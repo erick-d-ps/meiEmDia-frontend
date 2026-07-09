@@ -12,7 +12,7 @@ export default async function DashboardLayout({
   //console.log("User logado" ,user)
 
  return (
-  <main className="min-h-screen bg-background caret-transparent lg:flex">
+  <main className="min-h-screen bg-background lg:flex">
     <Sidebar />
 
     <div className="flex min-h-screen flex-1 flex-col">
