@@ -29,7 +29,7 @@ const settingsItems = [
     title: "Contador",
     description: "Cadastre ou edite os dados do seu contador.",
     icon: Landmark,
-    href: "/"
+    href: "/dashboard/accountant"
   },
   {
     title: "Exportar dados",
