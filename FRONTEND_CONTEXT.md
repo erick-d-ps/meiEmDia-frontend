@@ -14,12 +14,16 @@ Documento tecnico do frontend do projeto `mei-em-dia`, baseado no codigo atual d
 - `next/navigation`
 - `next/headers`
 - `next/font`
+- `next-themes` (0.4.6)
 - Sonner
 - Lucide React
 - React Day Picker
+- date-fns
 - `class-variance-authority`
 - `clsx`
 - `tailwind-merge`
+- `tw-animate-css` (1.4.0) - Animações CSS
+- `radix-ui` (1.6.0) - Componentes avançados
 
 ## Estrutura de Pastas
 
@@ -82,6 +86,14 @@ Documento tecnico do frontend do projeto `mei-em-dia`, baseado no codigo atual d
   - Componente client.
   - Usa `useActionState(registerAction, null)`.
   - Ao receber `state.success` com `redirectTo`, executa `router.replace(...)`.
+- `MeiDataForm`
+  - Arquivo: `src/components/form/meiDataForm.tsx`
+  - Componente client.
+  - Usa `useActionState(saveMeiAction, null)`.
+  - Formulario com dois layouts (grid 1x1 mobile, 2 colunas desktop).
+  - Campos: CNPJ, Razão Social, Nome Fantasia, Nome do Proprietário, CPF, Estado, Cidade, CNAE Principal, Tipo de Atividade, Presença de Contador.
+  - Usa componentes `Select` para tipo de atividade e estado.
+  - Exibe mensagens de sucesso/erro via `Alert`.
 
 ### Componentes de Dashboard
 
@@ -132,6 +144,7 @@ Todos ficam em `src/components/ui/` e servem como primitives reutilizaveis da in
 
 ## Server Actions Existentes
 
+### Autenticação
 Arquivo: `src/actions/auth.ts`
 
 - `registerAction`
@@ -148,6 +161,20 @@ Arquivo: `src/actions/auth.ts`
 - `logoutAction`
   - Remove o cookie de autenticacao via `removeToken()`.
   - Redireciona para `/login`.
+
+### Dados de MEI
+Arquivo: `src/actions/mei.ts`
+
+- `saveMeiAction`
+  - Recebe dados de MEI via `FormData` (cnpj, companyName, fantasyName, ownerName, cpf, state, city, mainActivityCNAE, activityType, hasAccountant).
+  - Valida `ActivityType` (deve ser "SERVICO", "COMERCIO" ou "MISTO").
+  - Sanitiza CNPJ e CPF removendo caracteres não-digitais.
+  - Requer autenticacao (token valido).
+  - Faz `POST /mei` usando `apiClient` com token.
+  - Em sucesso, retorna `{ success: true, error: "", message: "Dados do MEI salvos com sucesso." }`.
+  - Em erro 401, retorna mensagem de sessao expirada.
+  - Em erro 400, retorna mensagem de erro da API.
+  - Em outros erros, retorna mensagem genérica.
 
 ## Sistema de Autenticacao
 
@@ -276,9 +303,10 @@ Funcoes:
 
 Endpoints consumidos atualmente:
 
-- `POST /session`
-- `POST /user`
-- `GET /me`
+- `POST /session` - Login do usuario
+- `POST /user` - Registro de novo usuario
+- `GET /me` - Recupera dados do usuario autenticado
+- `POST /mei` - Salva dados do MEI do usuario
 
 ## Tipos
 
@@ -294,6 +322,26 @@ Arquivo: `src/lib/types.ts`
   - `name`
   - `email`
   - `token`
+- `ActivityType`
+  - Union type: `"SERVICO" | "COMERCIO" | "MISTO"`
+  - Representa o tipo de atividade do MEI
+- `Mei`
+  - `id`
+  - `cnpj`
+  - `companyName`
+  - `fantasyName?` (opcional)
+  - `ownerName`
+  - `cpf`
+  - `state`
+  - `city`
+  - `mainActivityCNAE`
+  - `activityType` (ActivityType)
+  - `hasAccountant` (boolean)
+- `FormActionState`
+  - `success` (boolean)
+  - `error` (string)
+  - `message?` (string - opcional, para mensagens de sucesso)
+  - `redirectTo?` (string - opcional, para redirecionamentos)
 
 ## Variaveis de Ambiente Utilizadas
 
@@ -316,7 +364,38 @@ Observacao importante:
 ## Observacoes Gerais do Estado Atual
 
 - Logout esta implementado e integrado ao menu do dashboard via `logoutAction`.
-- Nao ha middleware global para autenticacao.
-- O dashboard agora inclui sidebar desktop e mobile, alem de uma tela de configuracoes acessivel via menu.
-- As paginas `/dashboard/monthlyHistory`, `/dashboard/reports`, `/dashboard/settings` e `/dashboard/mei-data` existem no projeto, embora algumas ainda estejam em fase inicial.
-- O metadata global em `src/app/layout.tsx` ainda esta com os valores padrao do Create Next App.
+- Nao ha middleware global para autenticacao (proteção via layout ✓).
+- O dashboard inclui sidebar desktop e mobile, alem de uma tela de configuracoes.
+- Pagina `/dashboard/mei-data` agora esta funcional com `MeiDataForm` para cadastro de dados do MEI.
+- As paginas `/dashboard/monthlyHistory`, `/dashboard/reports`, `/dashboard/settings` e `/dashboard/mei-data` existem e estao acessiveis.
+- Suporte a temas com `next-themes` adicionado.
+- Animacoes CSS via `tw-animate-css` para melhor experiencia visual.
+- Novos tipos de dados estruturados para MEI com validacao de ActivityType.
+- Server Actions com tratamento robusto de erros (sessao expirada, validacao, erros 400/401).
+- FormActionState padronizado para todas as server actions com suporte a mensagens e redirecionamentos opcionais.
+
+## Historico de Mudancas Recentes
+
+### Atualizacoes em Julho de 2026
+
+**Novas dependências adicionadas:**
+- `next-themes` (0.4.6) - Suporte a temas (claro/escuro)
+- `radix-ui` (1.6.0) - Componentes avançados de UI
+- `tw-animate-css` (1.4.0) - Animações CSS via Tailwind
+
+**Novas funcionalidades:**
+- Server Action `saveMeiAction` em `src/actions/mei.ts` para salvar dados de MEI
+- Novo tipo `Mei` com estrutura completa de dados de MEI
+- Novo tipo `ActivityType` com validacao de tipo de atividade
+- Novo componente `MeiDataForm` para formulario de cadastro de MEI
+- Novo endpoint consumido: `POST /mei`
+
+**Melhorias em tipos:**
+- `FormActionState` agora inclui campos opcionais `message` e `redirectTo` para melhor controle de fluxo
+- Sanitizacao de CNPJ e CPF na Server Action (remocao de caracteres não-digitais)
+- Validacao de `ActivityType` na Server Action antes de enviar para a API
+
+**Status atual:**
+- Frontend totalmente funcional com autenticacao, dashboard protegido e formulario de MEI
+- Pronto para integração com backend para persistencia de dados de MEI
+- Estrutura de tipos consolidada para suportar proximas features
