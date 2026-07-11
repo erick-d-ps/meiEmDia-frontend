@@ -11,18 +11,20 @@ export default async function DashboardLayout({
   const user = await AuthenticatedUser();
   //console.log("User logado" ,user)
 
- return (
-  <main className="min-h-screen bg-background lg:flex">
-    <Sidebar />
+  return (
+    <div className="flex h-dvh min-h-0 overflow-hidden bg-background">
+      <Sidebar />
 
-    <div className="flex min-h-screen flex-1 flex-col">
-      <MobileSidebar userName={user.name} />
-      <Header userName={user.name} />
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <MobileSidebar userName={user.name} />
+        <Header userName={user.name} />
 
-      <div className="flex-1 px-4 py-4 lg:px-6 lg:py-6">
-        {children}
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+          <div className="mx-auto w-full max-w-7xl px-3 py-4 sm:px-5 lg:px-6 lg:py-6">
+            {children}
+          </div>
+        </div>
       </div>
     </div>
-  </main>
-);
+  );
 }

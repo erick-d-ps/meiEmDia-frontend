@@ -29,8 +29,8 @@ useEffect(() => {
 }, [state, router])
 
   return (
-    <main className="flex w-full items-center justify-center flex-col px-4">
-      <div className="max-w-3xl">
+    <main className="flex w-full flex-col items-center justify-center">
+      <div className="w-full max-w-xl px-4 sm:px-8">
         <Image
           alt="logo do app"
           src={logo}
@@ -38,7 +38,7 @@ useEffect(() => {
           priority={true}
           width={0}
           height={0}
-          className="sm:w-2xl mb-10"
+          className="mb-6 h-auto w-full sm:mb-10"
         />
       </div>
 

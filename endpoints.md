@@ -124,6 +124,7 @@ Content-Type: application/json
 {
   "cnpj": "12345678000195",
   "companyName": "Empresa Exemplo LTDA",
+  "fantasyName": "Empresa Exemplo",
   "ownerName": "Maria Souza",
   "cpf": "12345678901",
   "state": "SP",
@@ -137,6 +138,7 @@ Content-Type: application/json
 ### Validações
 - cnpj: string, mínimo 14 caracteres
 - companyName: string, mínimo 3 caracteres
+- fantasyName: string opcional; quando informado, mínimo 3 caracteres (também aceita string vazia)
 - ownerName: string, mínimo 3 caracteres
 - cpf: string, mínimo 11 caracteres
 - state: string, exatamente 2 caracteres
@@ -151,6 +153,7 @@ Content-Type: application/json
   "id": "uuid",
   "cnpj": "12345678000195",
   "companyName": "Empresa Exemplo LTDA",
+  "fantasyName": "Empresa Exemplo",
   "ownerName": "Maria Souza",
   "cpf": "12345678901",
   "state": "SP",
@@ -200,7 +203,131 @@ Authorization: Bearer <token>
 
 ---
 
-## 6) POST /revenue
+## 6) PUT /mei
+### Objetivo
+Atualizar todos os dados de MEI do usuário autenticado.
+
+### Headers
+```http
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+### Body
+```json
+{
+  "cnpj": "12345678000195",
+  "companyName": "Empresa Exemplo LTDA",
+  "fantasyName": "Empresa Exemplo",
+  "ownerName": "Maria Souza",
+  "cpf": "12345678901",
+  "state": "SP",
+  "city": "São Paulo",
+  "mainActivityCNAE": "6201501",
+  "activityType": "SERVICO",
+  "hasAccountant": true
+}
+```
+
+### Validações
+- O body é completo e segue as mesmas validações de `POST /mei`.
+- `fantasyName` é opcional; todos os demais campos são obrigatórios.
+
+### Resposta de sucesso (200)
+```json
+{
+  "id": "uuid",
+  "cnpj": "12345678000195",
+  "companyName": "Empresa Exemplo LTDA",
+  "fantasyName": "Empresa Exemplo",
+  "ownerName": "Maria Souza",
+  "cpf": "12345678901",
+  "state": "SP",
+  "city": "São Paulo",
+  "mainActivityCNAE": "6201501",
+  "activityType": "SERVICO",
+  "hasAccountant": true,
+  "updatedAt": "2026-07-11T00:00:00.000Z"
+}
+```
+
+### Possíveis erros
+- 401: token inválido ou ausente
+- 400: validação do schema
+- 400: MEI não encontrado
+
+---
+
+## 7) POST /accountant
+### Objetivo
+Cadastrar os dados do contador vinculado ao MEI do usuário autenticado.
+
+### Headers
+```http
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+### Body
+```json
+{
+  "name": "João Contador",
+  "email": "joao@contabilidade.com",
+  "phone": "11999999999"
+}
+```
+
+### Validações
+- name: string, mínimo 3 caracteres
+- email: string obrigatória
+- phone: string, entre 10 e 11 caracteres
+
+### Resposta de sucesso (200)
+```json
+{
+  "id": "uuid",
+  "name": "João Contador",
+  "email": "joao@contabilidade.com",
+  "phone": "11999999999",
+  "createdAt": "2026-07-11T00:00:00.000Z"
+}
+```
+
+### Possíveis erros
+- 401: token inválido ou ausente
+- 400: validação do schema
+- 400: MEI não encontrado
+- 400: o usuário já possui informações de contador cadastradas
+
+---
+
+## 8) GET /accountant
+### Objetivo
+Buscar os dados do contador vinculado ao MEI do usuário autenticado.
+
+### Headers
+```http
+Authorization: Bearer <token>
+```
+
+### Resposta de sucesso (200)
+```json
+{
+  "name": "João Contador",
+  "email": "joao@contabilidade.com",
+  "phone": "11999999999",
+  "createdAt": "2026-07-11T00:00:00.000Z"
+}
+```
+
+### Possíveis erros
+- 401: token inválido ou ausente
+- 400: MEI não encontrado
+- 400: contador não encontrado
+
+---
+
+## 9) POST /revenue
 ### Objetivo
 Cadastrar uma receita vinculada ao MEI do usuário autenticado.
 
@@ -245,7 +372,7 @@ Content-Type: application/json
 
 ---
 
-## 7) GET /revenues
+## 10) GET /revenues
 ### Objetivo
 Listar as receitas de um MEI.
 
@@ -287,7 +414,7 @@ GET /revenues?meiId=2f8d4c7d-6b65-4d2d-a0d5-c2b442a5f982
 
 ---
 
-## 8) GET /revenue/:id
+## 11) GET /revenue/:id
 ### Objetivo
 Buscar uma receita específica, garantindo que ela pertença ao MEI do usuário autenticado.
 
@@ -331,3 +458,4 @@ GET /revenue/1c4a0f91-f17f-4a8a-8f43-37c8a4f0f6cf
 - O projeto usa o header Authorization com o formato Bearer <token> para todas as rotas autenticadas.
 - O middleware validateSchema valida body, query e params de forma centralizada.
 - O middleware isAuthenticated injeta o identificador do usuário em req.user_id para os services.
+- No código atual, `GET /mei` também executa `AccountantSchema` e, por isso, exige no body `name` (mínimo 3 caracteres), além de aceitar `email` e `phone` opcionais. Como bodies em requisições GET não são amplamente suportados, esse vínculo de schema deve ser revisado no código.

@@ -5,16 +5,16 @@ import { AlertMessage } from "../../components/dashboard/alertMessage";
 
 export default function Dashboard() {
   return (
-    <main className="w-full mx-auto max-w-7xl justify-center items-center bg-background ">
-      <section className="flex items-center flex-col xl:flex-row justify-between gap-2">
-        <div className="flex-1 w-full p-4">
+    <main className="w-full">
+      <section className="grid gap-4 xl:grid-cols-2 xl:items-start">
+        <div className="min-w-0">
           <MeiStatus />
         </div>
-        <div className=" flex-1 w-full p-4">
+        <div className="min-w-0">
           <RecordInvoices/> 
         </div>
       </section>
-      <footer className="flex flex-1 items-center flex-col  justify-between">
+      <footer className="mt-4 flex flex-col gap-4">
         <HistoryButton />
         <AlertMessage />
       </footer>

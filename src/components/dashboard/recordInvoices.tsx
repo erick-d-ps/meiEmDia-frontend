@@ -21,14 +21,14 @@ export function RecordInvoices() {
           <Briefcase className="text-text-blue w-5 h-5" />
           Atividades
         </h2>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap justify-center gap-3">
           <p className="flex gap-2">
             <Wrench className="text-text-blue w-5 h-5" />
             Serviços:
           </p>
           <strong>2</strong>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap justify-center gap-3">
           <p className="flex gap-2">
             <Handshake className="text-text-blue w-5 h-5" />
             Vendas:
@@ -38,12 +38,12 @@ export function RecordInvoices() {
       </div>
       <div className="flex w-full flex-col gap-2 items-stretch justify-center my-2">
         <form className="w-full">
-          <Button type="submit" variant="ghost" className="w-full text-text-white bg-button-green cursor-pointer">
+          <Button type="submit" variant="ghost" className="h-auto min-h-9 w-full cursor-pointer whitespace-normal bg-button-green py-2 text-text-white">
             + Adicionar receita
           </Button>
         </form>
         <form className="w-full">
-          <Button type="submit" variant="ghost" className="w-full text-text-white bg-button-gray cursor-pointer">
+          <Button type="submit" variant="ghost" className="h-auto min-h-9 w-full cursor-pointer whitespace-normal bg-button-gray py-2 text-text-white">
             <Paperclip className="text-text-white w-5 h-5" />
             Anexar documento
           </Button>

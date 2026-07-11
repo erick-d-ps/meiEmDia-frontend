@@ -54,9 +54,9 @@ export function MobileSidebar({ userName }: SidbarProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   return (
-    <div className="sticky top-0 z-50 lg:hidden">
+    <div className="z-50 shrink-0 lg:hidden">
       <header className="bg-surface border-b border-border">
-        <div className="flex h-16 items-center justify-between px-4">
+        <div className="grid h-16 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 px-3 sm:px-4">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size={"icon"}>
@@ -65,12 +65,12 @@ export function MobileSidebar({ userName }: SidbarProps) {
             </SheetTrigger>
             <SheetContent
               side="left"
-              className="w-70 bg-surface border-borderGren "
+              className="w-[min(18rem,85vw)] border-borderGren bg-surface"
             >
               <SheetHeader className="border-b border-borderGren p-6">
                 <SheetTitle>Menu</SheetTitle>
               </SheetHeader>
-              <nav className="relative flex-1 p-4 space-y-4">
+              <nav className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-4">
                 {menuItens.map((menu) => {
                   const Icon = menu.icon;
                   const isActive = pathName === menu.href;
@@ -78,6 +78,7 @@ export function MobileSidebar({ userName }: SidbarProps) {
                     <Link
                       href={menu.href}
                       key={menu.title}
+                      onClick={() => setOpen(false)}
                       className={cn(
                         "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
                         isActive
@@ -92,11 +93,12 @@ export function MobileSidebar({ userName }: SidbarProps) {
                 })}
                 
               </nav>
-              <SheetFooter>
-                <footer className="absolute bottom-4">
-                  <div className="flex ">
+              <SheetFooter className="mt-auto border-t border-border p-4">
+                <footer className="w-full">
+                  <div>
                     <Link
                       href={"/dashboard/settings"}
+                      onClick={() => setOpen(false)}
                       className={cn(
                         "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 text-gray-700 hover:bg-gray-200 hover:text-black",
                       )}
@@ -122,13 +124,14 @@ export function MobileSidebar({ userName }: SidbarProps) {
 
           <MonthSelector
             date={selectedDate}
+            className="min-w-0 justify-center px-1 text-xs sm:px-3 sm:text-sm"
             onChange={(date) => {
               setSelectedDate(date);
             }}
           />
 
-          <div className="flex items-center justify-center">
-            <p className="text-sm font-medium">Olá, {userName}</p>
+          <div className="min-w-0 max-w-28 text-right sm:max-w-48">
+            <p className="truncate text-xs font-medium sm:text-sm">Olá, {userName}</p>
           </div>
         </div>
       </header>

@@ -8,12 +8,11 @@ interface HeaderProps {
 }
 
 export function Header({ userName }: HeaderProps) {
-  const [open, setOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   return (
-    <header className="hidden lg:flex overflow-hidden bg-background border-b border-border">
-      <div className="w-full max-w-7xl mx-auto h-18 px-4 flex justify-between items-center">
+    <header className="hidden h-18 shrink-0 border-b border-border bg-background lg:flex">
+      <div className="mx-auto flex h-full w-full max-w-7xl items-center justify-between px-6">
         <MonthSelector
           date={selectedDate}
           onChange={(date) => {

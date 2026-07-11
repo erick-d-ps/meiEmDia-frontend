@@ -16,8 +16,8 @@ import {
 export function FormAccountant() {
   const [hasAccountant, setHasAccountant] = useState<string | undefined>();
   return (
-    <main className="flex w-full items-center justify-center flex-col px-4 mt-4">
-      <section className="mx-auto max-w-3xl">
+    <main className="flex w-full flex-col items-center justify-center py-2 sm:py-4">
+      <section className="mx-auto w-full max-w-3xl">
         <div className="mb-8 text-center">
           <h1 className="text-2xl font-bold md:text-3xl">
             Cadastre os dados do seu Contador

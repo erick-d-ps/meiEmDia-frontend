@@ -9,10 +9,6 @@ import { cn } from "@/lib/utils";
 import { logoutAction } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 
-interface SidbarProps {
-  userName: string;
-}
-
 const menuItens = [
   {
     title: "Inicio",
@@ -42,8 +38,8 @@ export function Sidebar() {
   const pathName = usePathname();
 
   return (
-    <aside className="hidden lg:flex flex-col h-screen w-64 border-r border-border bg-surface">
-      <div className=" p-6">
+    <aside className="hidden h-full w-64 shrink-0 flex-col overflow-hidden border-r border-border bg-surface lg:flex">
+      <div className="shrink-0 p-6">
         <Image
           alt="logo do app"
           src={logo}
@@ -53,7 +49,7 @@ export function Sidebar() {
           height={0}
         />
       </div>
-      <nav className="relative flex-1 p-4 space-y-4">
+      <nav className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-4">
         {menuItens.map((menu) => {
           const Icon = menu.icon;
           const isActive = pathName === menu.href;
@@ -73,7 +69,7 @@ export function Sidebar() {
             </Link>
           );
         })}
-        <footer className="absolute bottom-4">
+        <footer className="mt-auto pt-4">
           
           <form action={logoutAction}>
             <Button

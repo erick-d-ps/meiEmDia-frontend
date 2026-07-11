@@ -1,9 +1,12 @@
-import { MeiDataForm } from "@/components/form/meiDataForm"
+import { getMei } from "@/actions/mei";
+import { MeiDataForm } from "@/components/form/meiDataForm";
 
-export default function MeiData(){
-   return(
+export default async function MeiData() {
+  const mei = await getMei();
+
+  return (
     <main>
-       <MeiDataForm /> 
+      <MeiDataForm initialMei={mei} />
     </main>
-   ) 
+  );
 }

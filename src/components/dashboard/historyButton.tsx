@@ -3,13 +3,13 @@ import { ChartNoAxesColumnIncreasing, Calendar } from "lucide-react";
 
 export function HistoryButton() {
   return (
-    <section className="mx-auto w-full px-4 py-2">
-      <div className="flex flex-col gap-2 lg:gap-8 lg:flex-row lg:items-stretch">
+    <section className="w-full">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-stretch lg:gap-6">
         <form className="w-full lg:w-1/2">
           <Button
             type="submit"
             variant="outline"
-            className="bg-surface w-full h-15 gap-5 cursor-pointer"
+            className="h-auto min-h-15 w-full cursor-pointer gap-3 whitespace-normal bg-surface px-3 py-3 text-center"
           >
             <ChartNoAxesColumnIncreasing className="text-text-blue w-6 h-6" />
             <strong>Ver relatorio mensal</strong>
@@ -20,7 +20,7 @@ export function HistoryButton() {
           <Button
             type="submit"
             variant="outline"
-            className="bg-surface w-full h-15 gap-5 cursor-pointer"
+            className="h-auto min-h-15 w-full cursor-pointer gap-3 whitespace-normal bg-surface px-3 py-3 text-center"
           >
             <Calendar className="text-text-blue w-6 h-6" />
             <strong>Histórico do mês</strong>

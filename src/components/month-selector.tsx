@@ -40,12 +40,12 @@ export function MonthSelector({
         <Button
           variant="ghost"
           className={cn(
-            "flex items-center gap-2 rounded-md px-3 text-sm font-semibold",
+            "flex max-w-full min-w-0 items-center gap-2 rounded-md px-3 text-sm font-semibold",
             className,
           )}
         >
-          {format(date, "MMMM / yyyy", { locale: ptBR })}
-          <CalendarIcon className="h-4 w-4" />
+          <span className="truncate">{format(date, "MMMM / yyyy", { locale: ptBR })}</span>
+          <CalendarIcon className="h-4 w-4 shrink-0" />
         </Button>
       </PopoverTrigger>
 

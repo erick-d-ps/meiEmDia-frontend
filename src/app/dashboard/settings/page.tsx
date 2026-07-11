@@ -53,8 +53,8 @@ const settingsItems = [
 
 export default function Settings() {
   return (
-    <main className="mx-auto max-h-screen w-full max-w-7xl p-4">
-      <header className="mb-8">
+    <main className="w-full">
+      <header className="mb-6 sm:mb-8">
         <h1 className="text-4xl font-bold">Configurações</h1>
         <p className="text-text-gray">
           Gerencie os dados e preferências da sua conta
@@ -69,16 +69,16 @@ export default function Settings() {
             <Link
               key={item.title}
               href={item.href}
-              className="h-auto min-h-32 justify-between whitespace-normal rounded-md border-border bg-white p-6 text-left hover:border-green-500 hover:bg-white hover:shadow-sm"
+              className="flex min-h-32 items-center justify-between gap-3 whitespace-normal rounded-md border border-border bg-white p-4 text-left hover:border-green-500 hover:bg-white hover:shadow-sm sm:p-6"
               
             >
-              <div className="flex items-center gap-6">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-green-100 text-green-600">
+              <div className="flex min-w-0 items-center gap-3 sm:gap-6">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-green-100 text-green-600 sm:h-14 sm:w-14">
                   <Icon size={28} strokeWidth={2} />
                 </div>
 
                 <div>
-                  <h2 className="text-xl font-bold">{item.title}</h2>
+                  <h2 className="text-lg font-bold sm:text-xl">{item.title}</h2>
                   <p className="mt-1 max-w-xs text-sm font-normal text-text-gray">
                     {item.description}
                   </p>
@@ -92,7 +92,7 @@ export default function Settings() {
       </section>
 
       <section className="mt-8 flex flex-col gap-5 rounded-md border border-red-300 bg-red-50 p-6 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-6">
+        <div className="flex items-start gap-3 sm:items-center sm:gap-6">
           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-red-200 text-red-600">
             <Trash2 size={26} />
           </div>
