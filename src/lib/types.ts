@@ -28,6 +28,14 @@ export interface Mei {
    hasAccountant: boolean;
 }
 
+export interface Accountant {
+   id?: string;
+   name: string;
+   email: string;
+   phone: string;
+   createdAt?: string;
+}
+
 export interface FormActionState {
    success: boolean;
    error: string;

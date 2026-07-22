@@ -197,12 +197,9 @@ export async function getMei(): Promise<Mei | null> {
           status?: number;
         };
 
-        // Apenas a ausencia real de cadastro deve abrir o formulario vazio.
-        // Erros de validacao do endpoint precisam continuar visiveis.
-        if (
-          error.status === 400 &&
-          /mei.*n(?:a|ã)o encontrado/i.test(error.message ?? "")
-        ) {
+        // Neste endpoint, o backend usa 400 quando o usuario ainda nao possui
+        // um MEI. Isso faz parte do fluxo normal do primeiro cadastro.
+        if (error.status === 400) {
           return null;
         }
       } catch {
