@@ -1,5 +1,12 @@
 import { Button } from "@/components/ui/button";
-import { StickyNoteCheck, Briefcase, Wrench, Handshake, Paperclip } from "lucide-react";
+import {
+  StickyNoteCheck,
+  Briefcase,
+  Wrench,
+  Handshake,
+  Paperclip,
+} from "lucide-react";
+import { RevenueRegister } from "@/components/dashboard/dialogRevenueRegister";
 
 export function RecordInvoices() {
   return (
@@ -37,13 +44,23 @@ export function RecordInvoices() {
         </div>
       </div>
       <div className="flex w-full flex-col gap-2 items-stretch justify-center my-2">
+        <div className="w-full">
+          <RevenueRegister>
+            <Button
+              type="button"
+              variant="ghost"
+              className="h-auto min-h-9 w-full cursor-pointer whitespace-normal bg-button-green py-2 text-text-white"
+            >
+              + Adicionar receita
+            </Button>
+          </RevenueRegister>
+        </div>
         <form className="w-full">
-          <Button type="submit" variant="ghost" className="h-auto min-h-9 w-full cursor-pointer whitespace-normal bg-button-green py-2 text-text-white">
-            + Adicionar receita
-          </Button>
-        </form>
-        <form className="w-full">
-          <Button type="submit" variant="ghost" className="h-auto min-h-9 w-full cursor-pointer whitespace-normal bg-button-gray py-2 text-text-white">
+          <Button
+            type="submit"
+            variant="ghost"
+            className="h-auto min-h-9 w-full cursor-pointer whitespace-normal bg-button-gray py-2 text-text-white"
+          >
             <Paperclip className="text-text-white w-5 h-5" />
             Anexar documento
           </Button>
