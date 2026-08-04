@@ -7,6 +7,7 @@ import {
   Paperclip,
 } from "lucide-react";
 import { RevenueRegister } from "@/components/dashboard/dialogRevenueRegister";
+import { DocumentRegister } from "./dialogDocumentRegister";
 
 export function RecordInvoices() {
   return (
@@ -55,16 +56,18 @@ export function RecordInvoices() {
             </Button>
           </RevenueRegister>
         </div>
-        <form className="w-full">
-          <Button
-            type="submit"
-            variant="ghost"
-            className="h-auto min-h-9 w-full cursor-pointer whitespace-normal bg-button-gray py-2 text-text-white"
-          >
-            <Paperclip className="text-text-white w-5 h-5" />
-            Anexar documento
-          </Button>
-        </form>
+        <div className="w-full">
+          <DocumentRegister>
+            <Button
+              type="submit"
+              variant="ghost"
+              className="h-auto min-h-9 w-full cursor-pointer whitespace-normal bg-button-gray py-2 text-text-white"
+            >
+              <Paperclip className="text-text-white w-5 h-5" />
+              Anexar documento
+            </Button>
+          </DocumentRegister>
+        </div>
       </div>
     </main>
   );
