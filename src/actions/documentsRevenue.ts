@@ -42,3 +42,26 @@ export async function CreateRevenue(formdata: FormData) {
     }
   }
 }
+
+export async function SearchHistory(){
+  try {
+    const token = await getToken();
+    const response = await apiClient<RevenueType[]>("/revenues", {
+      method: "GET",
+      token: token,
+    });
+
+    console.log(response);
+    
+    return { success: true, data: response };
+
+  }catch (err) {
+    console.log(err);
+    if (err instanceof Error) {
+      return {
+        success: false,
+        message: err.message,
+      };
+    }
+  }
+}
