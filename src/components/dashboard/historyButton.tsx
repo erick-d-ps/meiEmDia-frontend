@@ -1,11 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { ChartNoAxesColumnIncreasing, Calendar } from "lucide-react";
+import  Link  from "next/link";
 
 export function HistoryButton() {
   return (
     <section className="w-full">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-stretch lg:gap-6">
-        <form className="w-full lg:w-1/2">
+        <Link 
+         href="/dashboard/monthlyHistory"
+         className="w-full lg:w-1/2">
           <Button
             type="submit"
             variant="outline"
@@ -14,7 +17,7 @@ export function HistoryButton() {
             <ChartNoAxesColumnIncreasing className="text-text-blue w-6 h-6" />
             <strong>Ver relatorio mensal</strong>
           </Button>
-        </form>
+        </Link>
 
         <form className="w-full lg:w-1/2">
           <Button
