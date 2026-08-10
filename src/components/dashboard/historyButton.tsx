@@ -7,7 +7,7 @@ export function HistoryButton() {
     <section className="w-full">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-stretch lg:gap-6">
         <Link 
-         href="/dashboard/monthlyHistory"
+         href=""
          className="w-full lg:w-1/2">
           <Button
             type="submit"
@@ -19,7 +19,9 @@ export function HistoryButton() {
           </Button>
         </Link>
 
-        <form className="w-full lg:w-1/2">
+        <Link 
+          href="/dashboard/monthlyHistory"
+          className="w-full lg:w-1/2">
           <Button
             type="submit"
             variant="outline"
@@ -28,7 +30,7 @@ export function HistoryButton() {
             <Calendar className="text-text-blue w-6 h-6" />
             <strong>Histórico do mês</strong>
           </Button>
-        </form>
+        </Link>
       </div>
     </section>
   );
