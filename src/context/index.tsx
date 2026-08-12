@@ -1,21 +1,49 @@
 "use client";
 
-import { createContext, ReactNode, useState } from "react";
+import { createContext, ReactNode, useEffect, useState } from "react";
 
-interface DasboardProviderProps {
+interface DashboardProviderProps {
   children: ReactNode;
 }
 
 interface DashboardContextProps {
-  selectedDate: Date;
+  selectedDate: Date | null;
   setSelectedDate: (date: Date) => void;
 }
 
-export const DashboardContext = createContext({} as DashboardContextProps);
+export const DashboardContext = createContext(
+  {} as DashboardContextProps
+);
 
- function DashboardProvider({ children }: DasboardProviderProps) {
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  console.log("selectedDate", selectedDate);
+function DashboardProvider({ children }: DashboardProviderProps) {
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem("SELECTED_DATE");
+
+      if (saved) {
+        setSelectedDate(new Date(saved));
+      } else {
+        setSelectedDate(new Date());
+      }
+    } catch {
+      setSelectedDate(new Date());
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!selectedDate) return;
+
+    try {
+      sessionStorage.setItem(
+        "SELECTED_DATE",
+        selectedDate.toISOString()
+      );
+    } catch {
+      // ignore storage errors
+    }
+  }, [selectedDate]);
 
   return (
     <DashboardContext.Provider

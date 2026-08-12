@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { cn } from "@/lib/utils";
 import {
   Home,
@@ -23,6 +23,7 @@ import {
   SheetHeader,
 } from "@/components/ui/sheet";
 import { MonthSelector } from "@/components/month-selector";
+import { DashboardContext } from "@/context";
 
 interface SidbarProps {
   userName: string;
@@ -51,7 +52,7 @@ const menuItens = [
 export function MobileSidebar({ userName }: SidbarProps) {
   const pathName = usePathname();
   const [open, setOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const { selectedDate, setSelectedDate } = useContext(DashboardContext);
 
   return (
     <div className="z-50 shrink-0 lg:hidden">
@@ -91,7 +92,6 @@ export function MobileSidebar({ userName }: SidbarProps) {
                     </Link>
                   );
                 })}
-                
               </nav>
               <SheetFooter className="mt-auto border-t border-border p-4">
                 <footer className="w-full">
@@ -122,16 +122,18 @@ export function MobileSidebar({ userName }: SidbarProps) {
             </SheetContent>
           </Sheet>
 
-          <MonthSelector
-            date={selectedDate}
-            className="min-w-0 justify-center px-1 text-xs sm:px-3 sm:text-sm"
-            onChange={(date) => {
-              setSelectedDate(date);
-            }}
-          />
+          {selectedDate && (
+            <MonthSelector
+              date={selectedDate}
+              className="min-w-0 justify-center px-1 text-xs sm:px-3 sm:text-sm"
+              onChange={setSelectedDate}
+            />
+          )}
 
           <div className="min-w-0 max-w-28 text-right sm:max-w-48">
-            <p className="truncate text-xs font-medium sm:text-sm">Olá, {userName}</p>
+            <p className="truncate text-xs font-medium sm:text-sm">
+              Olá, {userName}
+            </p>
           </div>
         </div>
       </header>

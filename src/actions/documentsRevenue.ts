@@ -50,8 +50,6 @@ export async function SearchHistory(){
       method: "GET",
       token: token,
     });
-
-    console.log(response);
     
     return { success: true, data: response };
 
