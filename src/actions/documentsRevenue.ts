@@ -43,10 +43,12 @@ export async function CreateRevenue(formdata: FormData) {
   }
 }
 
-export async function SearchHistory(){
+export async function SearchHistory(month: number, year: number) {
   try {
     const token = await getToken();
-    const response = await apiClient<RevenueType[]>("/revenues", {
+    const response = await apiClient<RevenueType[]>(
+       `/revenues?month=${month}&year=${year}`,
+      {
       method: "GET",
       token: token,
     });

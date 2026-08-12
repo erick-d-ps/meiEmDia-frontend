@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
+import { DashboardContext } from "@/context";
 import { SearchHistory } from "@/actions/documentsRevenue";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -41,16 +42,28 @@ import { RevenueType } from "@/lib/types";
 } as const;
 
 export function RevenueTable() {
+  const { selectedDate } = useContext(DashboardContext);
   const [revenueData, setRevenueData] = useState<RevenueType[]>([]);
-  useEffect(() => {
-    async function fetchRevenueData() {
-      const response = await SearchHistory();
-      if (response?.success) {
-        setRevenueData(response.data ?? []);
-      }
+
+
+ useEffect(() => {
+  if (!selectedDate) return;
+
+  const date = selectedDate;
+
+  async function fetchRevenueData() {
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+
+    const response = await SearchHistory(month, year);
+
+    if (response?.success) {
+      setRevenueData(response.data ?? []);
     }
-    fetchRevenueData();
-  }, []);
+  }
+
+  fetchRevenueData();
+}, [selectedDate]);
 
   const getRevenueTypeLabel = (type: keyof typeof revenueTypeConfig) => {
     return revenueTypeConfig[type]?.label || "";
