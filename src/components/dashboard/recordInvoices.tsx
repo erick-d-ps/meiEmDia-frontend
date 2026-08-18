@@ -10,6 +10,7 @@ import {
   Wrench,
   Handshake,
   Paperclip,
+  Package,
 } from "lucide-react";
 import { RevenueRegister } from "@/components/dashboard/dialogRevenueRegister";
 import { DocumentRegister } from "./dialogDocumentRegister";
@@ -18,6 +19,10 @@ export function RecordInvoices() {
   const { selectedDate } = useContext(DashboardContext);
 
   const [totalRevenue, setTotalRevenue] = useState(0);
+  const [ releasesRevenue, setReleasesRevenue ] = useState(0);
+  const [ servicesRevenue, setServicesRevenue ] = useState(0);
+  const [ salesRevenue, setSalesRevenue ] = useState(0);
+  const [ othersRevenue, setOthersRevenue ] = useState(0);
 
   useEffect(() => {
     async function loadRevenue() {
@@ -30,6 +35,10 @@ export function RecordInvoices() {
 
       if (!revenues?.success || !revenues.data) {
         setTotalRevenue(0);
+        setReleasesRevenue(0);
+        setServicesRevenue(0);
+        setSalesRevenue(0);
+        setOthersRevenue(0);
         return;
       }
 
@@ -39,7 +48,16 @@ export function RecordInvoices() {
           0,
         );
       
-      setTotalRevenue(total);  
+       const servicesCount = revenues.data.filter((revenue) => revenue.type === "SERVICO").length;
+       const salesCount = revenues.data.filter((revenue) => revenue.type === "VENDA").length;
+       const othersCount = revenues.data.filter((revenue) => revenue.type === "OUTROS").length;
+
+      setTotalRevenue(total); 
+      setReleasesRevenue(revenues.data.length); 
+      setServicesRevenue(servicesCount);
+      setSalesRevenue(salesCount);
+      setOthersRevenue(othersCount);  
+    
     }
 
     loadRevenue();
@@ -57,7 +75,7 @@ export function RecordInvoices() {
           Lançamentos do mês
         </h1>
         <p className="flex gap-2">
-          <strong>4</strong>lansamentos
+          <strong>{releasesRevenue}</strong>lansamentos
         </p>
         <div className="w-3/4 border border-border my-2"></div>
         <h2 className="flex gap-1 font-medium">
@@ -69,14 +87,21 @@ export function RecordInvoices() {
             <Wrench className="text-text-blue w-5 h-5" />
             Serviços:
           </p>
-          <strong>2</strong>
+          <strong>{servicesRevenue}</strong>
         </div>
         <div className="flex flex-wrap justify-center gap-3">
           <p className="flex gap-2">
             <Handshake className="text-text-blue w-5 h-5" />
             Vendas:
           </p>
-          <strong>2</strong>
+          <strong>{salesRevenue}</strong>
+        </div>
+        <div className="flex flex-wrap justify-center gap-3">
+          <p className="flex gap-2">
+            <Package className="text-text-blue w-5 h-5" />
+            Outros:
+          </p>
+          <strong>{othersRevenue}</strong>
         </div>
       </div>
       <div className="flex w-full flex-col gap-2 items-stretch justify-center my-2">
