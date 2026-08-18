@@ -75,7 +75,7 @@ export function RevenueRegister({ children }: RevanueProps) {
                 [&::-webkit-outer-spin-button]:appearance-none
                 not-only:[&::-webkit-inner-spin-button]:appearance-none"
                   placeholder="EX: 100,00"
-                  type="number"
+                  type="text"
                 />
                 <div className="flex =justify-between mt-2 gap-2">
                   <div className="flex-1">

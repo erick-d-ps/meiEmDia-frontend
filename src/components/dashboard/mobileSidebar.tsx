@@ -125,7 +125,7 @@ export function MobileSidebar({ userName }: SidbarProps) {
           {selectedDate && (
             <MonthSelector
               date={selectedDate}
-              className="min-w-0 justify-center px-1 text-xs sm:px-3 sm:text-sm"
+              className="min-w-0 max-w-72 my-auto justify-self-center px-1 text-xs sm:px-3 sm:text-sm"
               onChange={setSelectedDate}
             />
           )}
