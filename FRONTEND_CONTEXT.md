@@ -4,17 +4,18 @@ Documento tecnico do frontend do projeto `mei-em-dia`, baseado no codigo atual d
 
 ## Tecnologias Utilizadas
 
-- Next.js 16 com App Router
-- React 19
+- Next.js 16.2.9 com App Router
+- React 19.2.4
 - TypeScript
 - Tailwind CSS 4
 - Shadcn/ui
 - Radix UI / Base UI
+- `@base-ui/react` (1.5.0) e `shadcn` (4.11.0)
 - Server Actions do Next.js
 - `next/navigation`
 - `next/headers`
 - `next/font`
-- `next-themes` (0.4.6)
+- `next-themes` (0.4.6, instalado; provider ainda nao configurado no layout)
 - Sonner
 - Lucide React
 - React Day Picker
@@ -24,6 +25,7 @@ Documento tecnico do frontend do projeto `mei-em-dia`, baseado no codigo atual d
 - `tailwind-merge`
 - `tw-animate-css` (1.4.0) - Animações CSS
 - `radix-ui` (1.6.0) - Componentes avançados
+- `react-day-picker` (10.0.1)
 
 ## Estrutura de Pastas
 
@@ -37,6 +39,7 @@ Documento tecnico do frontend do projeto `mei-em-dia`, baseado no codigo atual d
   - `dashboard/`: componentes visuais do dashboard, sidebar, header, status, lancamentos e historicos.
   - `ui/`: componentes reutilizaveis de interface baseados em Shadcn/Radix.
   - `month-selector.tsx`: seletor de mes/ano usado em dashboard desktop e mobile.
+  - `context/index.tsx`: provider client-side que compartilha o mes selecionado entre as telas do dashboard.
 - `src/lib/`
   - Funcoes de autenticacao, cliente de API, tipos e utilitarios.
 - `public/`
@@ -62,6 +65,7 @@ Documento tecnico do frontend do projeto `mei-em-dia`, baseado no codigo atual d
 - `/dashboard/mei-data`
   - Arquivo: `src/app/dashboard/mei-data/page.tsx`
   - Pagina de cadastro/edicao dos dados do MEI.
+  - Carrega os dados existentes com `getMei()` e usa `saveMeiAction` para criar ou atualizar.
 - `/dashboard/accountant`
   - Arquivo: `src/app/dashboard/accountant/page.tsx`
   - Pagina de cadastro/edicao dos dados do contador.
@@ -123,7 +127,8 @@ Documento tecnico do frontend do projeto `mei-em-dia`, baseado no codigo atual d
 - `MonthSelector`
   - Arquivo: `src/components/month-selector.tsx`
   - Abre um `Popover` com `Calendar`.
-  - Permite seleção de mes/ano e atualiza estado da data.
+  - Permite seleção de mes/ano entre janeiro de 2020 e dezembro de 2030.
+  - Atualiza o `DashboardContext`; a data e persistida em `sessionStorage` com a chave `SELECTED_DATE`.
 - `MeiStatus`
   - Arquivo: `src/components/dashboard/meiStatus.tsx`
   - Bloco de status do dashboard.
@@ -140,8 +145,11 @@ Documento tecnico do frontend do projeto `mei-em-dia`, baseado no codigo atual d
 - `RevenueTable`
   - Arquivo: `src/components/dashboard/revenueTable.tsx`
   - Tabela de histórico de receitas.
-  - Busca dados com `SearchHistory()` ao montar o componente.
+  - Busca dados com `SearchHistory(month, year)` sempre que o mes selecionado muda.
+  - Consulta a API com `GET /revenues?month={month}&year={year}`.
+  - Inclui campo de busca visual, mas ele ainda nao possui estado nem filtragem implementada.
   - Mapeia tipos `VENDA`, `SERVICO` e `OUTROS` para labels visuais.
+  - As opcoes `Visualizar`, `Editar` e `Excluir` ainda sao apenas visuais, sem handlers ou endpoints.
 - `RevenueRegister`
   - Arquivo: `src/components/dashboard/dialogRevenueRegister.tsx`
   - Modal para registrar receitas.
@@ -176,6 +184,9 @@ Todos ficam em `src/components/ui/` e servem como primitives reutilizaveis da in
 - `Sheet`
 - `Textarea`
 - `Toaster`
+- `Badge`
+- `DropdownMenu`
+- `Popover`
 
 ## Server Actions Existentes
 
@@ -205,9 +216,13 @@ Arquivo: `src/actions/mei.ts`
   - Valida `ActivityType`.
   - Sanitiza CNPJ e CPF utilizando apenas digitos.
   - Requer autenticacao via token.
-  - Faz `POST /mei` ou atualizacao equivalente via `apiClient`.
+  - Faz `POST /mei` na criacao e `PUT /mei` na edicao via `apiClient`.
+  - Valida CNPJ, CPF, estado, cidade, CNAE, nomes, tipo de atividade e presenca de contador.
   - Em sucesso, retorna mensagem de sucesso e dados salvos.
   - Trata erros 401/400 e situaçoes de sessão expirada.
+- `getMei()`
+  - Busca os dados do MEI com `GET /mei` sem cache.
+  - Retorna `null` quando nao ha token ou quando a API indica que o usuario ainda nao possui MEI.
 
 ### Contador
 Arquivo: `src/actions/accountant.ts`
@@ -230,9 +245,16 @@ Arquivo: `src/actions/documentsRevenue.ts`
   - Valida campos obrigatorios.
   - Envia para `POST /revenue` usando token autenticado.
   - Retorna `{ success: true }` ou mensagem de erro.
-- `SearchHistory()`
-  - Busca receitas via `GET /revenues`.
+- `SearchHistory(month, year)`
+  - Busca receitas do mes selecionado via `GET /revenues?month={month}&year={year}`.
   - Retorna lista de receitas formatada em `RevenueType[]`.
+
+## Estado Compartilhado do Dashboard
+
+- O `DashboardProvider`, em `src/context/index.tsx`, envolve o layout protegido do dashboard.
+- `selectedDate` inicia com a data atual e e restaurada do `sessionStorage` quando disponivel.
+- Header, sidebar mobile, seletor de mes e historico compartilham essa mesma selecao.
+- Falhas de leitura ou escrita do storage sao ignoradas e o fluxo continua usando a data atual.
 
 ## Sistema de Autenticacao
 
