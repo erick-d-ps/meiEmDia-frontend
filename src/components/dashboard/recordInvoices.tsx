@@ -19,10 +19,10 @@ export function RecordInvoices() {
   const { selectedDate } = useContext(DashboardContext);
 
   const [totalRevenue, setTotalRevenue] = useState(0);
-  const [ releasesRevenue, setReleasesRevenue ] = useState(0);
-  const [ servicesRevenue, setServicesRevenue ] = useState(0);
-  const [ salesRevenue, setSalesRevenue ] = useState(0);
-  const [ othersRevenue, setOthersRevenue ] = useState(0);
+  const [releasesRevenue, setReleasesRevenue] = useState(0);
+  const [servicesRevenue, setServicesRevenue] = useState(0);
+  const [salesRevenue, setSalesRevenue] = useState(0);
+  const [othersRevenue, setOthersRevenue] = useState(0);
 
   useEffect(() => {
     async function loadRevenue() {
@@ -42,22 +42,26 @@ export function RecordInvoices() {
         return;
       }
 
-      const total =
-        revenues.data?.reduce(
-          (acc, revenue) => acc + Number(revenue.amount),
-          0,
-        );
-      
-       const servicesCount = revenues.data.filter((revenue) => revenue.type === "SERVICO").length;
-       const salesCount = revenues.data.filter((revenue) => revenue.type === "VENDA").length;
-       const othersCount = revenues.data.filter((revenue) => revenue.type === "OUTROS").length;
+      const total = revenues.data?.reduce(
+        (acc, revenue) => acc + Number(revenue.amount),
+        0,
+      );
 
-      setTotalRevenue(total); 
-      setReleasesRevenue(revenues.data.length); 
+      const servicesCount = revenues.data.filter(
+        (revenue) => revenue.type === "SERVICO",
+      ).length;
+      const salesCount = revenues.data.filter(
+        (revenue) => revenue.type === "VENDA",
+      ).length;
+      const othersCount = revenues.data.filter(
+        (revenue) => revenue.type === "OUTROS",
+      ).length;
+
+      setTotalRevenue(total);
+      setReleasesRevenue(revenues.data.length);
       setServicesRevenue(servicesCount);
       setSalesRevenue(salesCount);
-      setOthersRevenue(othersCount);  
-    
+      setOthersRevenue(othersCount);
     }
 
     loadRevenue();
