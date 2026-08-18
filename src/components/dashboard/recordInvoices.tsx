@@ -1,3 +1,8 @@
+"use client";
+
+import { useState, useContext, useEffect } from "react";
+import { DashboardContext } from "@/context";
+import { SearchHistory } from "@/actions/documentsRevenue";
 import { Button } from "@/components/ui/button";
 import {
   StickyNoteCheck,
@@ -10,11 +15,41 @@ import { RevenueRegister } from "@/components/dashboard/dialogRevenueRegister";
 import { DocumentRegister } from "./dialogDocumentRegister";
 
 export function RecordInvoices() {
+  const { selectedDate } = useContext(DashboardContext);
+
+  const [totalRevenue, setTotalRevenue] = useState(0);
+
+  useEffect(() => {
+    async function loadRevenue() {
+      if (!selectedDate) return;
+
+      const month = selectedDate.getMonth() + 1;
+      const year = selectedDate.getFullYear();
+
+      const revenues = await SearchHistory(month, year);
+
+      if (!revenues?.success || !revenues.data) {
+        setTotalRevenue(0);
+        return;
+      }
+
+      const total =
+        revenues.data?.reduce(
+          (acc, revenue) => acc + Number(revenue.amount),
+          0,
+        );
+      
+      setTotalRevenue(total);  
+    }
+
+    loadRevenue();
+  }, [selectedDate]);
+
   return (
     <main className="flex w-full flex-col gap-2">
       <div className="flex w-full flex-col items-center justify-center border border-border rounded-md bg-surface p-2">
         <h2 className="font-normal">Receita no mês</h2>
-        <span className="font-bold text-xl">R$ 2525,23</span>
+        <span className="font-bold text-xl">R$ {totalRevenue.toFixed(2)}</span>
       </div>
       <div className="flex w-full flex-col gap-2 items-center justify-center border border-border rounded-md bg-surface p-2">
         <h1 className="flex gap-1 font-medium">
