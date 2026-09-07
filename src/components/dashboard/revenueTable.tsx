@@ -3,7 +3,9 @@
 import { useState, useEffect, useContext } from "react";
 import { DashboardContext } from "@/context";
 import { SearchHistory } from "@/actions/documentsRevenue";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import {
   Table,
   TableBody,
@@ -12,19 +14,24 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { FileText, MoreVertical, Search } from "lucide-react";
-import { RevenueType } from "@/lib/types";
 
- const revenueTypeConfig = {
+import { FileText, MoreVertical, Search } from "lucide-react";
+
+import { RevenueType } from "@/lib/types";
+import { RevenueUpdate } from "@/components/dashboard/dialogUpdateRevenue";
+
+const revenueTypeConfig = {
   VENDA: {
     label: "Venda",
     color: "bg-green-100 text-green-700",
@@ -43,32 +50,35 @@ import { RevenueType } from "@/lib/types";
 
 export function RevenueTable() {
   const { selectedDate } = useContext(DashboardContext);
+
   const [revenueData, setRevenueData] = useState<RevenueType[]>([]);
 
+  const [selectedRevenue, setSelectedRevenue] = useState<RevenueType | null>(
+    null,
+  );
 
- useEffect(() => {
-  if (!selectedDate) return;
+  useEffect(() => {
+    if (!selectedDate) return;
 
-  const date = selectedDate;
+    const date = selectedDate;
 
-  async function fetchRevenueData() {
-    const month = date.getMonth() + 1;
-    const year = date.getFullYear();
+    async function fetchRevenueData() {
+      const month = date.getMonth() + 1;
+      const year = date.getFullYear();
 
-    const response = await SearchHistory(month, year);
+      const response = await SearchHistory(month, year);
 
-    if (response?.success) {
-      setRevenueData(response.data ?? []);
+      if (response?.success) {
+        setRevenueData(response.data ?? []);
+      }
     }
-  }
 
-  fetchRevenueData();
-}, [selectedDate]);
+    fetchRevenueData();
+  }, [selectedDate]);
 
   const getRevenueTypeLabel = (type: keyof typeof revenueTypeConfig) => {
     return revenueTypeConfig[type]?.label || "";
-  }
-  
+  };
 
   return (
     <main className="flex mx-auto flex-col gap-4 w-full max-w-5xl">
@@ -88,10 +98,15 @@ export function RevenueTable() {
             <TableHeader>
               <TableRow>
                 <TableHead className="w-12"></TableHead>
+
                 <TableHead>DATA</TableHead>
+
                 <TableHead>DESCRIÇÃO</TableHead>
+
                 <TableHead>CATEGORIA</TableHead>
+
                 <TableHead className="text-right">VALOR</TableHead>
+
                 <TableHead className="w-12"></TableHead>
               </TableRow>
             </TableHeader>
@@ -106,27 +121,31 @@ export function RevenueTable() {
                   </TableCell>
 
                   <TableCell>
-                    {new Date(item.date).toLocaleDateString("pt-BR")}
+                    {item.date.slice(0, 10).split("-").reverse().join("/")}
                   </TableCell>
 
                   <TableCell>{item.note}</TableCell>
 
-              
-
                   <TableCell>
-                    <Badge className={revenueTypeConfig[item.type as keyof typeof revenueTypeConfig]?.color}>
-                      {getRevenueTypeLabel(item.type as keyof typeof revenueTypeConfig)}
+                    <Badge
+                      className={
+                        revenueTypeConfig[
+                          item.type as keyof typeof revenueTypeConfig
+                        ]?.color
+                      }
+                    >
+                      {getRevenueTypeLabel(
+                        item.type as keyof typeof revenueTypeConfig,
+                      )}
                     </Badge>
                   </TableCell>
 
-                  <TableCell>
+                  <TableCell className="text-right">
                     {new Intl.NumberFormat("pt-BR", {
                       style: "currency",
                       currency: "BRL",
                     }).format(Number(item.amount))}
                   </TableCell>
-
-                  <TableCell className="text-right font-semibold"></TableCell>
 
                   <TableCell>
                     <DropdownMenu>
@@ -137,8 +156,14 @@ export function RevenueTable() {
                       </DropdownMenuTrigger>
 
                       <DropdownMenuContent className="bg-surface" align="end">
-                        <DropdownMenuItem>Visualizar</DropdownMenuItem>
-                        <DropdownMenuItem>Editar</DropdownMenuItem>
+                        <DropdownMenuItem
+                          onSelect={() => {
+                            setSelectedRevenue(item);
+                          }}
+                        >
+                          Editar
+                        </DropdownMenuItem>
+
                         <DropdownMenuItem className="text-red-600">
                           Excluir
                         </DropdownMenuItem>
@@ -151,6 +176,18 @@ export function RevenueTable() {
           </Table>
         </CardContent>
       </Card>
+
+      {selectedRevenue && (
+        <RevenueUpdate
+          revenue={selectedRevenue}
+          open={!!selectedRevenue}
+          onOpenChange={(open) => {
+            if (!open) {
+              setSelectedRevenue(null);
+            }
+          }}
+        />
+      )}
     </main>
   );
 }

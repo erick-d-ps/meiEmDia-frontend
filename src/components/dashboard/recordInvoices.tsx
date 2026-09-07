@@ -71,7 +71,10 @@ export function RecordInvoices() {
     <main className="flex w-full flex-col gap-2">
       <div className="flex w-full flex-col items-center justify-center border border-border rounded-md bg-surface p-2">
         <h2 className="font-normal">Receita no mês</h2>
-        <span className="font-bold text-xl">R$ {totalRevenue.toFixed(2)}</span>
+        <span className="font-bold text-xl">{totalRevenue.toLocaleString("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        })}</span>
       </div>
       <div className="flex w-full flex-col gap-2 items-center justify-center border border-border rounded-md bg-surface p-2">
         <h1 className="flex gap-1 font-medium">

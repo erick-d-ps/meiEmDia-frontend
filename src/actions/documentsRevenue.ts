@@ -65,3 +65,45 @@ export async function SearchHistory(month: number, year: number) {
     }
   }
 }
+
+export async function UpdateRevenue(
+  id: string,
+  formData: FormData
+) {
+  try {
+    const token = await getToken();
+
+    const amount = Number(
+      String(formData.get("amount")).replace(",", ".")
+    );
+
+    const date = String(formData.get("date"));
+    const type = String(formData.get("type"));
+    const note = String(formData.get("note") || "");
+
+    const response = await apiClient('/revenue', {
+      method: "PUT",
+      token,
+      body: JSON.stringify({
+        id,
+        amount,
+        date,
+        type,
+        note,
+      }),
+    });
+
+    return {
+      success: true,
+      data: response,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Erro ao atualizar receita.",
+    };
+  }
+}
