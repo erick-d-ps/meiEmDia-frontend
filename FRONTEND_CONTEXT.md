@@ -1,525 +1,266 @@
 # FRONTEND_CONTEXT
 
-Documento tecnico do frontend do projeto `mei-em-dia`, baseado no codigo atual da pasta `frontend`.
-
-## Tecnologias Utilizadas
-
-- Next.js 16.2.9 com App Router
-- React 19.2.4
-- TypeScript
-- Tailwind CSS 4
-- Shadcn/ui
-- Radix UI / Base UI
-- `@base-ui/react` (1.5.0) e `shadcn` (4.11.0)
-- Server Actions do Next.js
-- `next/navigation`
-- `next/headers`
-- `next/font`
-- `next-themes` (0.4.6, instalado; provider ainda nao configurado no layout)
-- Sonner
-- Lucide React
-- React Day Picker
-- date-fns
-- `class-variance-authority`
-- `clsx`
-- `tailwind-merge`
-- `tw-animate-css` (1.4.0) - Animações CSS
-- `radix-ui` (1.6.0) - Componentes avançados
-- `react-day-picker` (10.0.1)
-
-## Estrutura de Pastas
-
-- `src/app/`
-  - Define as rotas, paginas e layouts do App Router.
-  - Contem a raiz `/`, o grupo publico `(public)` e a area protegida `/dashboard`.
-- `src/actions/`
-  - Contem Server Actions de autenticacao, MEI, contador e receitas/documentos.
-- `src/components/`
-  - `form/`: formularios de login, cadastro, MEI e contador.
-  - `dashboard/`: componentes visuais do dashboard, sidebar, header, status, lancamentos e historicos.
-  - `ui/`: componentes reutilizaveis de interface baseados em Shadcn/Radix.
-  - `month-selector.tsx`: seletor de mes/ano usado em dashboard desktop e mobile.
-  - `context/index.tsx`: provider client-side que compartilha o mes selecionado entre as telas do dashboard.
-- `src/lib/`
-  - Funcoes de autenticacao, cliente de API, tipos e utilitarios.
-- `public/`
-  - Arquivos estaticos como logos e imagens.
-
-## Rotas Implementadas
-
-- `/`
-  - Arquivo: `src/app/page.tsx`
-  - Verifica se ja existe usuario autenticado com `getUser()` antes de decidir o destino.
-  - Redireciona para `/dashboard` quando ha sessao valida e para `/login` quando nao ha.
-- `/login`
-  - Arquivo: `src/app/(public)/login/page.tsx`
-  - Pagina publica que renderiza o componente `FormLogin`.
-  - Valida a sessao atual e redireciona para o dashboard se o usuario ja estiver autenticado.
-- `/register`
-  - Arquivo: `src/app/(public)/register/page.tsx`
-  - Pagina publica que renderiza o componente `FormRegister`.
-- `/dashboard`
-  - Arquivos: `src/app/dashboard/layout.tsx` e `src/app/dashboard/page.tsx`
-  - Area protegida. O layout valida a sessao antes de renderizar os filhos.
-  - A pagina principal compoe `MeiStatus`, `RecordInvoices`, `HistoryButton` e `AlertMessage`.
-- `/dashboard/mei-data`
-  - Arquivo: `src/app/dashboard/mei-data/page.tsx`
-  - Pagina de cadastro/edicao dos dados do MEI.
-  - Carrega os dados existentes com `getMei()` e usa `saveMeiAction` para criar ou atualizar.
-- `/dashboard/accountant`
-  - Arquivo: `src/app/dashboard/accountant/page.tsx`
-  - Pagina de cadastro/edicao dos dados do contador.
-  - Busca os dados do MEI e do contador em paralelo e renderiza `FormAccountant`.
-- `/dashboard/monthlyHistory`
-  - Arquivo: `src/app/dashboard/monthlyHistory/page.tsx`
-  - Pagina de historico de receitas com `RevenueTable`.
-- `/dashboard/reports`
-  - Arquivo: `src/app/dashboard/reports/page.tsx`
-  - Tela ainda em esqueleto/placeholder, sem implementacao completa de relatorios.
-- `/dashboard/settings`
-  - Arquivo: `src/app/dashboard/settings/page.tsx`
-  - Tela com cards de acesso rapido e secao de exclusao de conta.
-
-## Componentes Principais
-
-### Formulários
-
-- `FormLogin`
-  - Arquivo: `src/components/form/loginForm.tsx`
-  - Componente client.
-  - Usa `useActionState(loginAction, null)`.
-  - Ao receber `state.success` com `redirectTo`, executa `router.replace(...)`.
-- `FormRegister`
-  - Arquivo: `src/components/form/registerForm.tsx`
-  - Componente client.
-  - Usa `useActionState(registerAction, null)`.
-  - Em caso de sucesso, navega para `/login`.
-- `MeiDataForm`
-  - Arquivo: `src/components/form/meiDataForm.tsx`
-  - Componente client.
-  - Usa `useActionState(saveMeiAction, null)`.
-  - Formulario com layout responsivo e campos de MEI.
-  - Campos: CNPJ, Razão Social, Nome Fantasia, Nome do Proprietário, CPF, Estado, Cidade, CNAE Principal, Tipo de Atividade e Presença de Contador.
-  - Inclui validacao de tipo de atividade e envio automatico do valor `hasAccountant` quando o usuario altera a opcao.
-- `FormAccountant`
-  - Arquivo: `src/components/form/formAccountant.tsx`
-  - Componente client.
-  - Usa `useActionState(saveAccountantAction, null)`.
-  - Valida nome, e-mail e telefone. 
-  - Se o MEI indicar que nao tem contador, exibe tela informativa e orienta a atualizar os dados do MEI antes de cadastrar o contador.
-
-### Componentes de Dashboard
-
-- `Sidebar`
-  - Arquivo: `src/components/dashboard/sidebar.tsx`
-  - Menu lateral desktop.
-  - Links para `Inicio`, `Histórico de meses`, `Relatórios` e `Configurações`.
-  - Usa `usePathname()` para destacar item ativo.
-  - Inclui botao de logout com `logoutAction`.
-- `MobileSidebar`
-  - Arquivo: `src/components/dashboard/mobileSidebar.tsx`
-  - Menu lateral mobile com `Sheet`.
-  - Exibe saudacao com o nome do usuario.
-  - Inclui `MonthSelector` e links do dashboard.
-- `Header`
-  - Arquivo: `src/components/dashboard/header.tsx`
-  - Cabeçalho desktop com `MonthSelector` e saudacao `Olá, {userName}`.
-- `MonthSelector`
-  - Arquivo: `src/components/month-selector.tsx`
-  - Abre um `Popover` com `Calendar`.
-  - Permite seleção de mes/ano entre janeiro de 2020 e dezembro de 2030.
-  - Atualiza o `DashboardContext`; a data e persistida em `sessionStorage` com a chave `SELECTED_DATE`.
-- `MeiStatus`
-  - Arquivo: `src/components/dashboard/meiStatus.tsx`
-  - Bloco de status do dashboard.
-  - Atualmente apresenta texto estático indicando que não há pendências no mes.
-- `RecordInvoices`
-  - Arquivo: `src/components/dashboard/recordInvoices.tsx`
-  - Card de resumo mensal de receitas e atividades.
-  - Exibe valores fixos e botões para adicionar receita e anexar documento.
-  - Usa `RevenueRegister` e `DocumentRegister` como modais.
-- `HistoryButton`
-  - Arquivo: `src/components/dashboard/historyButton.tsx`
-  - Blocos de acesso para relatorio mensal e histórico do mes.
-  - O botão de relatorio mensal ainda aponta para `href=""` (placeholder).
-- `RevenueTable`
-  - Arquivo: `src/components/dashboard/revenueTable.tsx`
-  - Tabela de histórico de receitas.
-  - Busca dados com `SearchHistory(month, year)` sempre que o mes selecionado muda.
-  - Consulta a API com `GET /revenues?month={month}&year={year}`.
-  - Inclui campo de busca visual, mas ele ainda nao possui estado nem filtragem implementada.
-  - Mapeia tipos `VENDA`, `SERVICO` e `OUTROS` para labels visuais.
-  - As opcoes `Visualizar`, `Editar` e `Excluir` ainda sao apenas visuais, sem handlers ou endpoints.
-- `RevenueRegister`
-  - Arquivo: `src/components/dashboard/dialogRevenueRegister.tsx`
-  - Modal para registrar receitas.
-  - Envia `amount`, `date`, `type` e `note` para `CreateRevenue()`.
-  - Usa `sonner` para exibir tost notifications.
-- `DocumentRegister`
-  - Arquivo: `src/components/dashboard/dialogDocumentRegister.tsx`
-  - Modal de upload de documentos.
-  - Implementado na UI, mas ainda sem persistencia real conectada a API.
-- `Settings` (pagina)
-  - Arquivo: `src/app/dashboard/settings/page.tsx`
-  - Implementa cards de acesso rapido e zona de perigo.
-  - Inclui acesso à rota de contador e dados do MEI.
-
-### Componentes de UI
-
-Todos ficam em `src/components/ui/` e servem como primitives reutilizaveis da interface:
-
-- `Alert`, `AlertTitle`, `AlertDescription`, `AlertAction`
-- `Button`
-- `Calendar`, `CalendarDayButton`
-- `Card`, `CardHeader`, `CardFooter`, `CardTitle`, `CardContent`, `CardDescription`, `CardAction`
-- `Checkbox`
-- `Combobox`
-- `Dialog`
-- `Field`
-- `Input`
-- `InputGroup`
-- `Label`
-- `Select` e subcomponentes
-- `Separator`
-- `Sheet`
-- `Textarea`
-- `Toaster`
-- `Badge`
-- `DropdownMenu`
-- `Popover`
-
-## Server Actions Existentes
-
-### Autenticação
-Arquivo: `src/actions/auth.ts`
-
-- `registerAction`
-  - Recebe `name`, `email` e `password` via `FormData`.
-  - Faz `POST /user` usando `apiClient`.
-  - Em sucesso, retorna `{ success: true, error: "", redirectTo: "/login" }`.
-  - Em erro, retorna `{ success: false, error: ... }`.
-- `loginAction`
-  - Recebe `email` e `password` via `FormData`.
-  - Faz `POST /session` usando `apiClient`.
-  - Salva o token no cookie por meio de `setToken(authData.token)`.
-  - Em sucesso, retorna `{ success: true, error: "", redirectTo: "/dashboard" }`.
-  - Em erro, trata especialmente status `401` e `400`.
-- `logoutAction`
-  - Remove o cookie de autenticacao via `removeToken()`.
-  - Redireciona para `/login`.
-
-### MEI
-Arquivo: `src/actions/mei.ts`
-
-- `saveMeiAction`
-  - Recebe dados de MEI via `FormData` (cnpj, companyName, fantasyName, ownerName, cpf, state, city, mainActivityCNAE, activityType, hasAccountant).
-  - Valida `ActivityType`.
-  - Sanitiza CNPJ e CPF utilizando apenas digitos.
-  - Requer autenticacao via token.
-  - Faz `POST /mei` na criacao e `PUT /mei` na edicao via `apiClient`.
-  - Valida CNPJ, CPF, estado, cidade, CNAE, nomes, tipo de atividade e presenca de contador.
-  - Em sucesso, retorna mensagem de sucesso e dados salvos.
-  - Trata erros 401/400 e situaçoes de sessão expirada.
-- `getMei()`
-  - Busca os dados do MEI com `GET /mei` sem cache.
-  - Retorna `null` quando nao ha token ou quando a API indica que o usuario ainda nao possui MEI.
-
-### Contador
-Arquivo: `src/actions/accountant.ts`
-
-- `saveAccountantAction`
-  - Valida nome, e-mail e telefone do contador.
-  - Detecta se e criacao ou edicao com base em `initialAccountant` e `prevState?.data`.
-  - Usa `POST /accountant` ou `PUT /accountant` conforme necessario.
-  - Em sucesso, retorna `message` de atualizacao ou cadastro e `data` com o registro salvo.
-  - Em erro, trata 400 e 401 com mensagens amigaveis.
-- `getAccountant()`
-  - Busca os dados do contador autenticado via `GET /accountant`.
-  - Retorna `null` quando o contador nao existe.
-
-### Receitas e documentos
-Arquivo: `src/actions/documentsRevenue.ts`
-
-- `CreateRevenue(formdata: FormData)`
-  - Recebe `amount`, `type`, `date` e `note`.
-  - Valida campos obrigatorios.
-  - Envia para `POST /revenue` usando token autenticado.
-  - Retorna `{ success: true }` ou mensagem de erro.
-- `SearchHistory(month, year)`
-  - Busca receitas do mes selecionado via `GET /revenues?month={month}&year={year}`.
-  - Retorna lista de receitas formatada em `RevenueType[]`.
-
-## Estado Compartilhado do Dashboard
-
-- O `DashboardProvider`, em `src/context/index.tsx`, envolve o layout protegido do dashboard.
-- `selectedDate` inicia com a data atual e e restaurada do `sessionStorage` quando disponivel.
-- Header, sidebar mobile, seletor de mes e historico compartilham essa mesma selecao.
-- Falhas de leitura ou escrita do storage sao ignoradas e o fluxo continua usando a data atual.
-
-## Sistema de Autenticacao
-
-Arquivos principais:
-
-- `src/actions/auth.ts`
-- `src/lib/auth.ts`
-- `src/lib/api.ts`
-- `src/lib/types.ts`
-
-Fluxo atual:
-
-1. O usuario envia o formulario de login.
-2. `loginAction` chama `POST /session`.
-3. A API responde com um `AuthUser`, incluindo `token`.
-4. O token e salvo em cookie HTTP-only com `setToken`.
-5. O formulario recebe `redirectTo: "/dashboard"` e faz navegacao client-side com `router.replace`.
-6. Ao entrar em `/dashboard`, o layout chama `AuthenticatedUser()`.
-7. `AuthenticatedUser()` usa `getUser()`, que le o token do cookie e chama `GET /me`.
-8. Se a API confirmar o usuario, o dashboard e renderizado; em caso contrario, redireciona para `/login`.
-
-## Protecao de Rotas
-
-Atualmente a protecao existe apenas na area `dashboard`.
-
-- Funcao responsavel: `AuthenticatedUser()` em `src/lib/auth.ts`
-- Ponto de aplicacao: `src/app/dashboard/layout.tsx`
-- Estrategia:
-  - le o cookie `token_MeiEmDia`
-  - se nao houver token, retorna `redirect("/login")`
-  - se houver token, chama `/me`
-  - se `/me` falhar ou retornar usuario invalido, tambem redireciona para `/login`
-
-Nao existe `middleware.ts` no projeto neste momento. A protecao e feita no layout server-side da rota protegida.
-
-## Como o Dashboard e Protegido
-
-O dashboard e protegido no arquivo `src/app/dashboard/layout.tsx`.
-
-Esse layout e assincrono e executa:
-
-```tsx
-const user = await AuthenticatedUser();
-```
-
-A funcao `AuthenticatedUser()`:
-
-- chama `getUser()`
-- `getUser()` le o token salvo em cookie
-- se existir token, envia a requisicao autenticada para `GET /me`
-- se nao existir usuario valido, executa `redirect("/login")`
-
-Como o layout e server-side, o conteudo de `/dashboard` nem chega a ser renderizado para usuarios nao autenticados.
-
-## Como Funciona o DashboardLayout
-
-Arquivo: `src/app/dashboard/layout.tsx`
-
-Responsabilidades atuais:
-
-- validar autenticacao antes de renderizar o dashboard
-- envolver as paginas filhas com a estrutura base do dashboard
-- renderizar `Sidebar` no desktop e `MobileSidebar` no mobile
-- renderizar `Header` em desktop
-- passar `user.name` ao `MobileSidebar` e ao `Header` para exibicao da saudacao
-
-Observacoes:
-
-- o layout inclui `Sidebar`, `MobileSidebar` e `Header`.
-- `user` e retornado por `AuthenticatedUser()` e usado no header mobile e desktop.
-- `Header` e exibido apenas em telas maiores e inclui `MonthSelector`.
-- `MobileSidebar` exibe um menu `Sheet`, o `MonthSelector` e o nome do usuario.
-- o `Sidebar` desktop e o `MobileSidebar` mobile contem links para as paginas do dashboard.
-- a rota `/dashboard/settings` ja esta implementada e acessivel pelo menu.
-
-## Como Funciona o Redirect para Login
-
-Ha tres fluxos principais de redirect relacionados ao login:
-
-### 1. Redirect automatico ao acessar a raiz
-
-Arquivo: `src/app/page.tsx`
-
-- a rota `/` consulta `getUser()` antes de decidir o destino
-- se houver usuario autenticado, envia para `/dashboard`
-- se nao houver, envia para `/login`
-
-### 2. Redirect quando o usuario nao esta autenticado
-
-Arquivo: `src/lib/auth.ts`
-
-- `AuthenticatedUser()` chama `redirect("/login")` quando `getUser()` retorna `null`
-- isso acontece quando:
-  - nao existe cookie `token_MeiEmDia`
-  - o token e invalido
-  - a chamada para `/me` falha
-
-### 3. Redirect apos sucesso no login e cadastro
-
-Arquivos:
-
-- `src/components/form/loginForm.tsx`
-- `src/components/form/registerForm.tsx`
-
-Nestes casos o redirect nao usa `redirect()` do servidor. O fluxo e:
-
-- a Server Action retorna `redirectTo`
-- o componente client observa `state.success`
-- o `useEffect` chama `router.replace(state.redirectTo)`
-
-## API Client
-
-Arquivo: `src/lib/api.ts`
-
-Funcoes:
-
-- `getApiUrl()`
-  - retorna o valor de `NEXT_PUBLIC_API_URL`
-- `apiClient<T>()`
-  - centraliza chamadas HTTP da aplicacao
-  - concatena `NEXT_PUBLIC_API_URL + endpoint`
-  - envia `Content-Type: application/json`
-  - injeta header `Authorization: Bearer <token>` quando recebe `token`
-  - faz parse do JSON de resposta
-  - em erro HTTP, lanca `Error` com payload serializado contendo `message` e `status`
-
-Endpoints consumidos atualmente:
-
-- `POST /session` - Login do usuario
-- `POST /user` - Registro de novo usuario
-- `GET /me` - Recupera dados do usuario autenticado
-- `POST /mei` - Salva dados do MEI do usuario
-- `GET /accountant` - Recupera dados do contador
-- `POST /accountant` - Cria dados do contador
-- `PUT /accountant` - Atualiza dados do contador
-- `POST /revenue` - Cria receita
-- `GET /revenues` - Lista receita historica
-
-## Tipos
-
-Arquivo: `src/lib/types.ts`
-
-- `User`
-  - `id`
-  - `name`
-  - `email`
-  - `createAt`
-- `AuthUser`
-  - `id`
-  - `name`
-  - `email`
-  - `token`
-- `ActivityType`
-  - Union type: `"SERVICO" | "COMERCIO" | "MISTO"`
-  - Representa o tipo de atividade do MEI
-- `Mei`
-  - `id`
-  - `cnpj`
-  - `companyName`
-  - `fantasyName?` (opcional)
-  - `ownerName`
-  - `cpf`
-  - `state`
-  - `city`
-  - `mainActivityCNAE`
-  - `activityType` (ActivityType)
-  - `hasAccountant` (boolean)
-- `Accountant`
-  - `id?`
-  - `name`
-  - `email`
-  - `phone`
-  - `createdAt?`
-- `RevenueType`
-  - `id`
-  - `amount`
-  - `date`
-  - `type`
-  - `note`
-  - `creatAt`
-- `FormActionState`
-  - `success` (boolean)
-  - `error` (string)
-  - `message?` (string - opcional, para mensagens de sucesso)
-  - `redirectTo?` (string - opcional, para redirecionamentos)
-
-## Variaveis de Ambiente Utilizadas
-
-As variaveis efetivamente usadas no codigo sao:
-
-- `NEXT_PUBLIC_API_URL`
-  - usada em `src/lib/api.ts`
-  - define a URL base da API consumida pelo frontend
-  - valor atual no `.env`: `http://localhost:3333`
-- `NODE_ENV`
-  - usada em `src/lib/auth.ts`
-  - controla a flag `secure` do cookie:
-    - `true` em producao
-    - `false` fora de producao
-
-Observacao importante:
-
-- `NODE_ENV` aparece no `.env`, mas em aplicacoes Next.js normalmente ela ja e controlada pelo proprio runtime/build.
-
-## Observacoes Gerais do Estado Atual
-
-- Logout esta implementado e integrado ao menu do dashboard via `logoutAction`.
-- Nao ha middleware global para autenticacao (proteção via layout ✓).
-- O dashboard inclui sidebar desktop e mobile, alem de uma tela de configuracoes.
-- Pagina `/dashboard/mei-data` esta funcional com `MeiDataForm` para cadastro e atualizacao dos dados do MEI.
-- Rota `/dashboard/accountant` esta funcional com `FormAccountant` para cadastro de dados do contador.
-- Pagina `/dashboard/monthlyHistory` exibe historico de receitas carregado via API.
-- O dashboard principal inclui blocos de status, resumo mensal e modais de registro de receitas/documentos.
-- As paginas `/dashboard/monthlyHistory`, `/dashboard/reports`, `/dashboard/settings`, `/dashboard/mei-data` e `/dashboard/accountant` existem e estao acessiveis.
-- Suporte a temas com `next-themes` adicionado.
-- Animacoes CSS via `tw-animate-css` para melhor experiencia visual.
-- Novos tipos de dados estruturados para MEI e contador.
-- Server Actions com tratamento robusto de erros (sessao expirada, validacao, erros 400/401).
-- FormActionState padronizado para todas as server actions com suporte a mensagens e redirecionamentos opcionais.
-- A funcionalidade de relatorios ainda e placeholder e a parte de upload/documentos ainda nao esta integrada ao backend.
-
-## Historico de Mudancas Recentes
-
-### Atualizacoes em Agosto de 2026
-
-**Novas funcionalidades:**
-- Cadastro e edicao de dados do contador em `/dashboard/accountant`.
-- Modal de cadastro de receitas na dashboard principal com integracao a `CreateRevenue()`.
-- Tabela de historico de receitas em `/dashboard/monthlyHistory` carregando `GET /revenues`.
-- Cards de configuracao com acesso direto ao MEI e ao contador.
-- Layout de dashboard com blocos dinâmicos para status, receitas e anexos.
-
-**Server Actions adicionadas:**
-- `saveAccountantAction` e `getAccountant` em `src/actions/accountant.ts`.
-- `CreateRevenue` e `SearchHistory` em `src/actions/documentsRevenue.ts`.
-
-**Tipos adicionados/atualizados:**
-- `Accountant` com `name`, `email` e `phone`.
-- `RevenueType` com `amount`, `date`, `type`, `note` e `creatAt`.
-
-**Observações de implementação:**
-- O fluxo principal de receitas ja esta parcialmente integrado ao backend.
-- A parte de relatorios e documentos ainda precisa de integração e refinamento.
-- O dashboard continua com alguns indicadores e totais mockados na interface, especialmente em `MeiStatus` e `RecordInvoices`.
-
-### Atualizacoes em Julho de 2026
-
-**Novas dependências adicionadas:**
-- `next-themes` (0.4.6) - Suporte a temas (claro/escuro)
-- `radix-ui` (1.6.0) - Componentes avançados de UI
-- `tw-animate-css` (1.4.0) - Animações CSS via Tailwind
-
-**Novas funcionalidades:**
-- Server Action `saveMeiAction` em `src/actions/mei.ts` para salvar dados de MEI
-- Novo tipo `Mei` com estrutura completa de dados de MEI
-- Novo tipo `ActivityType` com validacao de tipo de atividade
-- Novo componente `MeiDataForm` para formulario de cadastro de MEI
-- Novo endpoint consumido: `POST /mei`
-
-**Melhorias em tipos:**
-- `FormActionState` agora inclui campos opcionais `message` e `redirectTo` para melhor controle de fluxo
-- Sanitizacao de CNPJ e CPF na Server Action (remocao de caracteres não-digitais)
-- Validacao de `ActivityType` na Server Action antes de enviar para a API
-
-**Status atual:**
-- Frontend com autenticacao, dashboard protegido, formulario de MEI e novo fluxo de cadastro do contador
-- Estrutura de tipos consolidada para suportar as próximas features do projeto
-- Estrutura de tipos consolidada para suportar proximas features
+Documento tecnico do frontend do projeto `mei-em-dia`, atualizado em setembro de 2026 a partir do codigo presente na pasta `frontend`.
+
+## Visao geral
+
+O frontend e uma aplicacao Next.js com App Router para autenticacao de usuarios MEI, cadastro dos dados empresariais, cadastro opcional de contador, lancamento de receitas e consulta do historico mensal.
+
+O fluxo principal implementado e:
+
+1. O usuario cria uma conta ou realiza login.
+2. O token retornado pela API e salvo em cookie HTTP-only.
+3. O layout de `/dashboard` valida a sessao no servidor antes de renderizar a area protegida.
+4. O usuario pode cadastrar ou editar os dados do MEI.
+5. Se o MEI indicar que possui contador, o usuario pode cadastrar ou editar os dados do contador.
+6. O usuario seleciona mes e ano e registra receitas para o periodo.
+7. O dashboard e o historico consultam as receitas do periodo selecionado.
+
+## Tecnologias e dependencias
+
+- Next.js `16.2.9` com App Router
+- React `19.2.4`
+- TypeScript `5`
+- Tailwind CSS `4`
+- Shadcn/ui, Radix UI e Base UI
+- Server Actions
+- `next/navigation`, `next/headers` e `next/font`
+- `next-themes` instalado, mas sem provider configurado no layout raiz
+- Sonner para notificacoes toast
+- Lucide React para icones
+- React Day Picker e `date-fns` para componentes de data
+- `class-variance-authority`, `clsx` e `tailwind-merge`
+- `tw-animate-css` para animacoes CSS
+
+Scripts disponiveis em `package.json`:
+
+- `npm run dev`
+- `npm run build`
+- `npm run start`
+
+## Estrutura de pastas
+
+- `src/app/`: rotas, paginas e layouts do App Router.
+- `src/actions/`: Server Actions para autenticacao, MEI, contador e receitas.
+- `src/components/form/`: formularios de login, cadastro, MEI e contador.
+- `src/components/dashboard/`: sidebar, header, status, receitas, historico e dialogs.
+- `src/components/ui/`: primitives reutilizaveis baseadas em Shadcn/Radix/Base UI.
+- `src/context/`: estado compartilhado do periodo selecionado no dashboard.
+- `src/lib/`: cliente HTTP, autenticacao, tipos e utilitarios.
+- `public/`: arquivos estaticos.
+
+## Rotas
+
+### Rotas publicas
+
+- `/`: consulta `getUser()` e redireciona para `/dashboard` quando ha sessao valida ou `/login` quando nao ha.
+- `/login`: renderiza `FormLogin` e redireciona usuarios autenticados para o dashboard.
+- `/register`: renderiza `FormRegister`.
+
+### Rotas protegidas
+
+- `/dashboard`: dashboard principal com status do MEI, resumo de receitas, atalhos e alertas.
+- `/dashboard/mei-data`: cadastro e edicao dos dados do MEI.
+- `/dashboard/accountant`: cadastro e edicao dos dados do contador.
+- `/dashboard/monthlyHistory`: historico de receitas do mes selecionado.
+- `/dashboard/reports`: pagina existente, mas ainda e apenas um placeholder.
+- `/dashboard/settings`: cards de configuracoes e zona de perigo.
+
+A protecao e aplicada em `src/app/dashboard/layout.tsx` por meio de `AuthenticatedUser()`. Nao existe `middleware.ts`.
+
+## Funcionalidades implementadas
+
+### Autenticacao
+
+- Registro com nome, e-mail e senha via `POST /user`.
+- Login via `POST /session`.
+- Token salvo no cookie HTTP-only `token_MeiEmDia`.
+- Logout remove o cookie e redireciona para `/login`.
+- Tratamento especifico para erros 400 e 401 no login.
+- Redirect client-side apos sucesso usando `router.replace()` nos formularios.
+- Validacao server-side do usuario autenticado via `GET /me` antes do dashboard.
+
+Arquivos principais: `src/actions/auth.ts`, `src/lib/auth.ts`, `src/components/form/loginForm.tsx` e `src/components/form/registerForm.tsx`.
+
+### Cadastro e edicao do MEI
+
+`MeiDataForm` permite informar:
+
+- CNPJ
+- Razao social
+- Nome fantasia opcional
+- Nome do proprietario
+- CPF
+- Estado e cidade
+- CNAE principal
+- Tipo de atividade: `SERVICO`, `COMERCIO` ou `MISTO`
+- Se possui contador
+
+`saveMeiAction`:
+
+- Usa `POST /mei` para criacao e `PUT /mei` para edicao.
+- Sanitiza CNPJ e CPF mantendo apenas digitos.
+- Normaliza o estado para maiusculas.
+- Valida campos obrigatorios, tamanhos minimos, tipo de atividade e presenca de contador.
+- Mantem os dados retornados no estado da Server Action.
+- Trata sessao expirada e erros HTTP 400/401.
+
+O formulario tambem envia automaticamente o valor de `hasAccountant` quando a opcao e alterada.
+
+### Cadastro e edicao do contador
+
+`/dashboard/accountant` busca os dados do MEI e do contador em paralelo usando `Promise.all`.
+
+`FormAccountant`:
+
+- Exige que o MEI esteja configurado com `hasAccountant = true`.
+- Exibe orientacao e link para `/dashboard/mei-data` quando o MEI informa que nao possui contador.
+- Permite editar nome, e-mail e telefone.
+- Valida nome, formato de e-mail e telefone com DDD.
+- Usa `POST /accountant` na criacao e `PUT /accountant` na edicao.
+- Exibe estados de salvamento, sucesso e erro.
+
+### Receitas
+
+`CreateRevenue` registra receitas via `POST /revenue` com:
+
+- valor
+- data
+- tipo: `VENDA`, `SERVICO` ou `OUTROS`
+- observacao opcional
+
+O dialog `RevenueRegister` abre o formulario de lancamento e exibe feedback com Sonner. O componente `UpdateRevenue` tambem existe e e usado no menu da tabela, mas atualmente reutiliza `CreateRevenue`; portanto, ainda nao atualiza um registro existente.
+
+`SearchHistory(month, year)` consulta `GET /revenues?month={month}&year={year}`.
+
+### Resumo mensal e historico
+
+`DashboardProvider` compartilha `selectedDate` entre header, sidebar mobile, dashboard e historico.
+
+`MonthSelector`:
+
+- Permite selecionar mes de janeiro de 2020 a dezembro de 2030.
+- Usa `date-fns` com localidade `pt-BR`.
+- Persiste a selecao em `sessionStorage` com a chave `SELECTED_DATE`.
+- Ignora falhas de leitura ou escrita do storage e usa a data atual como fallback.
+
+`RecordInvoices` consulta o periodo selecionado e apresenta:
+
+- receita total formatada em BRL
+- quantidade total de lancamentos
+- quantidade de servicos
+- quantidade de vendas
+- quantidade de outros lancamentos
+- acao para adicionar receita
+- acao para abrir o dialog de anexar documento
+
+`RevenueTable` apresenta o historico do periodo com data, descricao, categoria, valor e menu de acoes. A busca visual ainda nao possui estado ou filtragem. A acao `Excluir` ainda nao possui handler ou endpoint. A acao `Editar` abre `UpdateRevenue`, mas o fluxo atual cria uma nova receita em vez de atualizar a selecionada.
+
+### Documentos
+
+`DocumentRegister` possui a interface para:
+
+- selecionar arquivo JPG, PNG ou PDF de ate 5 MB
+- selecionar tipo de documento
+- vincular opcionalmente a uma receita
+- informar observacao
+
+O formulario ainda nao possui `onSubmit`, Server Action ou endpoint de persistencia. O cancelamento tambem e apenas visual no estado atual.
+
+### Configuracoes
+
+`/dashboard/settings` possui:
+
+- acesso funcional aos dados do MEI
+- acesso funcional ao cadastro do contador
+- cards visuais para minha conta, exportacao de dados, plano e seguranca
+- zona de perigo com botao de exclusao de conta
+
+Os cards de minha conta, exportacao, plano e seguranca apontam para `/`, e a exclusao de conta ainda nao possui handler ou integracao com API.
+
+## Componentes de dashboard
+
+- `Sidebar`: menu desktop com Inicio, Historico de meses, Relatorios e Configuracoes, alem do logout.
+- `MobileSidebar`: menu mobile em `Sheet`, com saudacao, seletor de mes e navegacao.
+- `Header`: saudacao do usuario e seletor de mes no desktop.
+- `MeiStatus`: status visual atualmente estatico, sem consulta real de pendencias.
+- `AlertMessage`: bloco de alerta do dashboard.
+- `HistoryButton`: atalhos para relatorio mensal e historico; o relatorio ainda usa `href=""`.
+- `RevenueRegister`: dialog funcional para criacao de receita.
+- `UpdateRevenue`: dialog presente no menu de historico, mas sem atualizacao real.
+- `DocumentRegister`: dialog visual de upload, sem persistencia.
+- `RevenueTable`: tabela do historico mensal.
+- `RecordInvoices`: resumo agregado do periodo selecionado.
+
+## Server Actions e endpoints
+
+### `src/actions/auth.ts`
+
+- `registerAction`: `POST /user`.
+- `loginAction`: `POST /session` e salva o token.
+- `logoutAction`: remove o token e redireciona.
+
+### `src/actions/mei.ts`
+
+- `getMei`: `GET /mei` sem cache.
+- `saveMeiAction`: `POST /mei` ou `PUT /mei`.
+
+### `src/actions/accountant.ts`
+
+- `getAccountant`: `GET /accountant` sem cache.
+- `saveAccountantAction`: `POST /accountant` ou `PUT /accountant`.
+
+### `src/actions/documentsRevenue.ts`
+
+- `CreateRevenue`: `POST /revenue`.
+- `SearchHistory`: `GET /revenues?month={month}&year={year}`.
+
+Nao ha endpoints de receita para atualizar ou excluir documentados no frontend, nem endpoint de documentos, exportacao ou exclusao de conta sendo consumido atualmente.
+
+## API client
+
+`src/lib/api.ts` centraliza chamadas HTTP:
+
+- concatena `NEXT_PUBLIC_API_URL` ao endpoint;
+- envia `Content-Type: application/json`;
+- adiciona `Authorization: Bearer <token>` quando um token e informado;
+- suporta `cache: "no-store"` e opcoes `next`;
+- transforma respostas HTTP nao-OK em `Error` com `message` e `status` serializados.
+
+## Tipos principais
+
+Em `src/lib/types.ts`:
+
+- `User`: id, nome, e-mail e data de criacao.
+- `AuthUser`: dados do usuario autenticado e token.
+- `ActivityType`: `SERVICO | COMERCIO | MISTO`.
+- `Mei`: dados cadastrais e indicacao de contador.
+- `Accountant`: nome, e-mail, telefone e metadados opcionais.
+- `RevenueType`: id, valor, data, tipo, observacao e data de criacao.
+- `FormActionState`: estado padronizado com sucesso, erro, mensagem e redirect opcional.
+
+## Layout e notificacoes
+
+O layout raiz define idioma `pt-BR`, fontes Geist e metadados basicos. O `Toaster` do Sonner e renderizado globalmente no `src/app/layout.tsx`.
+
+Embora `next-themes` esteja instalado e o componente `src/components/ui/sonner.tsx` leia o tema, o layout ainda nao envolve a aplicacao com um `ThemeProvider`; portanto, o suporte a troca de tema nao esta configurado como funcionalidade de produto.
+
+## Variaveis de ambiente
+
+- `NEXT_PUBLIC_API_URL`: URL base da API, usada por `apiClient`.
+- `NODE_ENV`: controla a flag `secure` do cookie de autenticacao em `src/lib/auth.ts`.
+
+O valor local documentado de `NEXT_PUBLIC_API_URL` e `http://localhost:3333`.
+
+## Pendencias conhecidas
+
+- Implementar a pagina de relatorios e conectar o atalho do dashboard.
+- Implementar busca e filtragem na tabela de receitas.
+- Implementar atualizacao real de receitas e passar o registro selecionado ao dialog de edicao.
+- Implementar exclusao de receitas, se suportada pela API.
+- Conectar upload de documentos ao backend, incluindo estado de arquivo, tipo, vinculo e observacao.
+- Implementar configuracoes de conta, exportacao, plano e seguranca.
+- Implementar exclusao de conta com confirmacao e integracao segura.
+- Tornar o status do MEI e os alertas baseados em dados reais.
+- Configurar `ThemeProvider` caso o suporte a temas seja mantido.
+- Adicionar testes automatizados para Server Actions, autenticacao, formularios e agregacao mensal.
