@@ -22,6 +22,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -30,6 +41,7 @@ import { FileText, MoreVertical, Search } from "lucide-react";
 
 import { RevenueType } from "@/lib/types";
 import { RevenueUpdate } from "@/components/dashboard/dialogUpdateRevenue";
+import { DeleteRevenue } from "@/actions/documentsRevenue";
 
 const revenueTypeConfig = {
   VENDA: {
@@ -54,6 +66,10 @@ export function RevenueTable() {
   const [revenueData, setRevenueData] = useState<RevenueType[]>([]);
 
   const [selectedRevenue, setSelectedRevenue] = useState<RevenueType | null>(
+    null,
+  );
+
+  const [revenueToDelete, setRevenueToDelete] = useState<RevenueType | null>(
     null,
   );
 
@@ -164,7 +180,12 @@ export function RevenueTable() {
                           Editar
                         </DropdownMenuItem>
 
-                        <DropdownMenuItem className="text-red-600">
+                        <DropdownMenuItem
+                          className="text-red-600"
+                          onSelect={() => {
+                            setRevenueToDelete(item);
+                          }}
+                        >
                           Excluir
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -188,6 +209,50 @@ export function RevenueTable() {
           }}
         />
       )}
+      <AlertDialog
+        open={!!revenueToDelete}
+        onOpenChange={(open) => {
+          if (!open) {
+            setRevenueToDelete(null);
+          }
+        }}
+      >
+        <AlertDialogContent className="bg-surface">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir receita?</AlertDialogTitle>
+
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir esta receita? Essa ação não poderá
+              ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700 focus:ring-red-600 text-white"
+              onClick={async () => {
+                if (!revenueToDelete) return;
+
+                const response = await DeleteRevenue(revenueToDelete.id);
+
+                if (response.success) {
+                  setRevenueData((current) =>
+                    current.filter(
+                      (revenue) => revenue.id !== revenueToDelete.id,
+                    ),
+                  );
+
+                  setRevenueToDelete(null);
+                }
+              }}
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </main>
   );
 }
