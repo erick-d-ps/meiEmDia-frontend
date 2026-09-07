@@ -82,7 +82,7 @@ export function RecordInvoices() {
           Lançamentos do mês
         </h1>
         <p className="flex gap-2">
-          <strong>{releasesRevenue}</strong>lansamentos
+          <strong>{releasesRevenue}</strong>lançamentos
         </p>
         <div className="w-3/4 border border-border my-2"></div>
         <h2 className="flex gap-1 font-medium">
