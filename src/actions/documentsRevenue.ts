@@ -107,3 +107,26 @@ export async function UpdateRevenue(
     };
   }
 }
+
+export async function DeleteRevenue(id: string){
+  try {
+    const token = await getToken();
+    const response = await apiClient(`/revenue/remuv?revenue_id=${id}`, {
+      method: "DELETE",
+      token,
+    });
+    return{
+      success: true,
+      data: response,
+      message: "Receita deletada com sucesso."
+    }
+  }catch (error) {
+    return {
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Erro ao deletar receita.",
+    };
+  }
+}
