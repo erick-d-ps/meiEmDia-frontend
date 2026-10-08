@@ -1,20 +1,17 @@
 # Endpoints do projeto MEI em Dia
 
-Este documento reúne todos os endpoints atualmente disponíveis na API, com exemplos de request e response.
+Documentacao dos endpoints registrados atualmente pela API.
 
 ## Base URL
 ```text
 http://localhost:3333
 ```
 
-## 1) POST /user
-### Objetivo
-Criar um novo usuário.
+## Autenticacao
+As rotas autenticadas exigem `Authorization: Bearer <token>`. O token e obtido em `POST /session` e validado por `isAuthenticated`.
 
-### Headers
-```http
-Content-Type: application/json
-```
+## 1) POST /user
+Cria um usuario.
 
 ### Body
 ```json
@@ -25,12 +22,9 @@ Content-Type: application/json
 }
 ```
 
-### Validações
-- name: string, mínimo 3 caracteres
-- email: string
-- password: string, mínimo 6 caracteres
+Validacoes: `name` string com no minimo 3 caracteres; `email` string obrigatoria (sem validacao de formato); `password` string com no minimo 6 caracteres.
 
-### Resposta de sucesso (200)
+### Resposta de sucesso: 200
 ```json
 {
   "id": "uuid",
@@ -40,20 +34,10 @@ Content-Type: application/json
 }
 ```
 
-### Possíveis erros
-- 400: validação do schema
-- 400: Email já cadastrado
-
----
+Erros possiveis: `400` para validacao ou e-mail ja cadastrado.
 
 ## 2) POST /session
-### Objetivo
-Autenticar um usuário e retornar um token JWT.
-
-### Headers
-```http
-Content-Type: application/json
-```
+Autentica o usuario e retorna um JWT com expiracao de 30 dias.
 
 ### Body
 ```json
@@ -63,11 +47,9 @@ Content-Type: application/json
 }
 ```
 
-### Validações
-- email: string
-- password: string, mínimo 6 caracteres
+Validacoes: `email` string obrigatoria (sem validacao de formato); `password` string com no minimo 6 caracteres.
 
-### Resposta de sucesso (200)
+### Resposta de sucesso: 200
 ```json
 {
   "id": "uuid",
@@ -77,47 +59,15 @@ Content-Type: application/json
 }
 ```
 
-### Possíveis erros
-- 400: validação do schema
-- 400: Senha ou email invalido
-
----
+Erros possiveis: `400` para validacao ou credenciais invalidas.
 
 ## 3) GET /me
-### Objetivo
-Retornar os dados do usuário autenticado.
+Retorna os dados do usuario autenticado: `id`, `name`, `email` e `createdAt`.
 
-### Headers
-```http
-Authorization: Bearer <token>
-```
-
-### Resposta de sucesso (200)
-```json
-{
-  "id": "uuid",
-  "name": "Maria Souza",
-  "email": "maria@email.com",
-  "createdAt": "2026-07-08T00:00:00.000Z"
-}
-```
-
-### Possíveis erros
-- 401: Token não encontrado
-- 401: Token inválido
-- 400: Usuário não encontrado
-
----
+Erros possiveis: `401` para token ausente/invalido; `400` se o usuario nao for encontrado.
 
 ## 4) POST /mei
-### Objetivo
-Cadastrar os dados de MEI do usuário autenticado.
-
-### Headers
-```http
-Authorization: Bearer <token>
-Content-Type: application/json
-```
+Cria os dados de MEI do usuario autenticado.
 
 ### Body
 ```json
@@ -128,149 +78,32 @@ Content-Type: application/json
   "ownerName": "Maria Souza",
   "cpf": "12345678901",
   "state": "SP",
-  "city": "São Paulo",
+  "city": "Sao Paulo",
   "mainActivityCNAE": "6201501",
   "activityType": "SERVICO",
   "hasAccountant": false
 }
 ```
 
-### Validações
-- cnpj: string, mínimo 14 caracteres
-- companyName: string, mínimo 3 caracteres
-- fantasyName: string opcional; quando informado, mínimo 3 caracteres (também aceita string vazia)
-- ownerName: string, mínimo 3 caracteres
-- cpf: string, mínimo 11 caracteres
-- state: string, exatamente 2 caracteres
-- city: string, mínimo 2 caracteres
-- mainActivityCNAE: string, mínimo 4 caracteres
-- activityType: SERVICO | COMERCIO | MISTO
-- hasAccountant: boolean
+Validacoes: `cnpj` minimo 14; `companyName` minimo 3; `fantasyName` opcional, minimo 3 quando preenchido e aceita `""`; `ownerName` minimo 3; `cpf` minimo 11; `state` exatamente 2; `city` minimo 2; `mainActivityCNAE` minimo 4; `activityType` `SERVICO`, `COMERCIO` ou `MISTO`; `hasAccountant` booleano.
 
-### Resposta de sucesso (200)
-```json
-{
-  "id": "uuid",
-  "cnpj": "12345678000195",
-  "companyName": "Empresa Exemplo LTDA",
-  "fantasyName": "Empresa Exemplo",
-  "ownerName": "Maria Souza",
-  "cpf": "12345678901",
-  "state": "SP",
-  "city": "São Paulo",
-  "mainActivityCNAE": "6201501",
-  "activityType": "SERVICO",
-  "hasAccountant": false
-}
-```
+### Resposta de sucesso: 200
+Retorna o MEI criado com `id` e os campos enviados.
 
-### Possíveis erros
-- 401: token inválido ou ausente
-- 400: validação do schema
-- 400: usuário não encontrado
-- 400: o usuário já possui informações de MEI cadastradas
-
----
+Erros possiveis: `401` para autenticacao; `400` para validacao, usuario inexistente ou MEI ja cadastrado.
 
 ## 5) GET /mei
-### Objetivo
-Buscar os dados de MEI do usuário autenticado.
+Retorna o MEI associado ao usuario autenticado, com `id`, `cnpj`, `companyName`, `fantasyName`, `ownerName`, `cpf`, `state`, `city`, `mainActivityCNAE`, `activityType` e `hasAccountant`. Se o usuario ainda nao tiver MEI cadastrado, retorna `null` com status `200`.
 
-### Headers
-```http
-Authorization: Bearer <token>
-```
-
-### Resposta de sucesso (200)
-```json
-{
-  "id": "uuid",
-  "cnpj": "12345678000195",
-  "companyName": "Empresa Exemplo LTDA",
-  "ownerName": "Maria Souza",
-  "cpf": "12345678901",
-  "state": "SP",
-  "city": "São Paulo",
-  "mainActivityCNAE": "6201501",
-  "activityType": "SERVICO",
-  "hasAccountant": false
-}
-```
-
-### Possíveis erros
-- 401: token inválido ou ausente
-- 400: MEI não encontrado
-
----
+Erros possiveis: `401` para autenticacao.
 
 ## 6) PUT /mei
-### Objetivo
-Atualizar todos os dados de MEI do usuário autenticado.
-
-### Headers
-```http
-Authorization: Bearer <token>
-Content-Type: application/json
-```
-
-### Body
-```json
-{
-  "cnpj": "12345678000195",
-  "companyName": "Empresa Exemplo LTDA",
-  "fantasyName": "Empresa Exemplo",
-  "ownerName": "Maria Souza",
-  "cpf": "12345678901",
-  "state": "SP",
-  "city": "São Paulo",
-  "mainActivityCNAE": "6201501",
-  "activityType": "SERVICO",
-  "hasAccountant": true
-}
-```
-
-### Validações
-- O body é completo e segue as mesmas validações de `POST /mei`.
-- `fantasyName` é opcional; todos os demais campos são obrigatórios.
-
-### Resposta de sucesso (200)
-```json
-{
-  "id": "uuid",
-  "cnpj": "12345678000195",
-  "companyName": "Empresa Exemplo LTDA",
-  "fantasyName": "Empresa Exemplo",
-  "ownerName": "Maria Souza",
-  "cpf": "12345678901",
-  "state": "SP",
-  "city": "São Paulo",
-  "mainActivityCNAE": "6201501",
-  "activityType": "SERVICO",
-  "hasAccountant": true,
-  "updatedAt": "2026-07-11T00:00:00.000Z"
-}
-```
-
-### Possíveis erros
-- 401: token inválido ou ausente
-- 400: validação do schema
-- 400: MEI não encontrado
-
----
+Atualiza todos os dados do MEI. Usa as mesmas validacoes de `POST /mei`; todos os campos sao obrigatorios, exceto `fantasyName`. Retorna os campos atualizados e `updatedAt`.
 
 ## 7) PATCH /mei
-### Objetivo
-Atualizar parcialmente os dados de MEI do usuário autenticado.
-
-### Headers
-```http
-Authorization: Bearer <token>
-Content-Type: application/json
-```
+Atualiza parcialmente o MEI. Todos os campos sao opcionais e um objeto vazio tambem e aceito. As validacoes sao as mesmas de `POST /mei` quando um campo e informado. Retorna os campos atualizados e `updatedAt`.
 
 ### Body
-Todos os campos são opcionais. Envie somente os dados que deseja atualizar.
-
 ```json
 {
   "fantasyName": "Novo Nome Fantasia",
@@ -278,163 +111,46 @@ Todos os campos são opcionais. Envie somente os dados que deseja atualizar.
 }
 ```
 
-### Campos aceitos e validações
-- cnpj: string, mínimo 14 caracteres
-- companyName: string, mínimo 3 caracteres
-- fantasyName: string, mínimo 3 caracteres (também aceita string vazia)
-- ownerName: string, mínimo 3 caracteres
-- cpf: string, mínimo 11 caracteres
-- state: string, exatamente 2 caracteres
-- city: string, mínimo 2 caracteres
-- mainActivityCNAE: string, mínimo 4 caracteres
-- activityType: SERVICO | COMERCIO | MISTO
-- hasAccountant: boolean
-
-### Resposta de sucesso (200)
-```json
-{
-  "id": "uuid",
-  "cnpj": "12345678000195",
-  "companyName": "Empresa Exemplo LTDA",
-  "fantasyName": "Novo Nome Fantasia",
-  "ownerName": "Maria Souza",
-  "cpf": "12345678901",
-  "state": "SP",
-  "city": "São Paulo",
-  "mainActivityCNAE": "6201501",
-  "activityType": "SERVICO",
-  "hasAccountant": true,
-  "updatedAt": "2026-07-15T00:00:00.000Z"
-}
-```
-
-### Possíveis erros
-- 401: token inválido ou ausente
-- 400: validação do schema
-- 400: MEI não encontrado
-
----
-
 ## 8) POST /accountant
-### Objetivo
-Cadastrar os dados do contador vinculado ao MEI do usuário autenticado.
-
-### Headers
-```http
-Authorization: Bearer <token>
-Content-Type: application/json
-```
+Cria o contador vinculado ao MEI autenticado.
 
 ### Body
 ```json
 {
-  "name": "João Contador",
+  "name": "Joao Contador",
   "email": "joao@contabilidade.com",
   "phone": "11999999999"
 }
 ```
 
-### Validações
-- name: string, mínimo 3 caracteres
-- email: string obrigatória
-- phone: string, entre 10 e 11 caracteres
+Validacoes: `name` string com no minimo 3; `email` string obrigatoria (sem validacao de formato); `phone` string entre 10 e 11 caracteres.
 
-### Resposta de sucesso (200)
-```json
-{
-  "id": "uuid",
-  "name": "João Contador",
-  "email": "joao@contabilidade.com",
-  "phone": "11999999999",
-  "createdAt": "2026-07-11T00:00:00.000Z"
-}
-```
+### Resposta de sucesso: 200
+Retorna `id`, `name`, `email`, `phone` e `createdAt`.
 
-### Possíveis erros
-- 401: token inválido ou ausente
-- 400: validação do schema
-- 400: MEI não encontrado
-- 400: o usuário já possui informações de contador cadastradas
-
----
+Erros possiveis: `401` para autenticacao; `400` para validacao, MEI inexistente ou contador ja cadastrado.
 
 ## 9) GET /accountant
-### Objetivo
-Buscar os dados do contador vinculado ao MEI do usuário autenticado.
+Retorna o contador do MEI autenticado, com `name`, `email`, `phone` e `createdAt`. Se o usuario nao tiver MEI ou contador cadastrado, retorna `null` com status `200`.
 
-### Headers
-```http
-Authorization: Bearer <token>
-```
-
-### Resposta de sucesso (200)
-```json
-{
-  "name": "João Contador",
-  "email": "joao@contabilidade.com",
-  "phone": "11999999999",
-  "createdAt": "2026-07-11T00:00:00.000Z"
-}
-```
-
-### Possíveis erros
-- 401: token inválido ou ausente
-- 400: MEI não encontrado
-- 400: contador não encontrado
-
----
+Erros possiveis: `401` para autenticacao.
 
 ## 10) PUT /accountant
-### Objetivo
-Atualizar todos os dados do contador vinculado ao MEI do usuário autenticado.
+Atualiza completamente o contador. `name`, `email` e `phone` sao obrigatorios e seguem as validacoes de `POST /accountant`.
 
-### Headers
-```http
-Authorization: Bearer <token>
-Content-Type: application/json
-```
-
-### Body
+### Resposta de sucesso: 200
 ```json
 {
-  "name": "João Contador Atualizado",
+  "name": "Joao Contador Atualizado",
   "email": "novo-email@contabilidade.com",
   "phone": "11988888888"
 }
 ```
 
-### Validações
-- name: string, mínimo 3 caracteres
-- email: string obrigatória
-- phone: string, entre 10 e 11 caracteres
-- O body é completo; os três campos são obrigatórios.
-
-### Resposta de sucesso (200)
-```json
-{
-  "name": "João Contador Atualizado",
-  "email": "novo-email@contabilidade.com",
-  "phone": "11988888888"
-}
-```
-
-### Possíveis erros
-- 401: token inválido ou ausente
-- 400: validação do schema
-- 400: MEI não encontrado
-- 400: informações do contador ainda não foram criadas
-
----
+Erros possiveis: `401` para autenticacao; `400` para validacao, MEI inexistente ou contador ainda nao criado.
 
 ## 11) POST /revenue
-### Objetivo
-Cadastrar uma receita vinculada ao MEI do usuário autenticado.
-
-### Headers
-```http
-Authorization: Bearer <token>
-Content-Type: application/json
-```
+Cria uma receita vinculada ao MEI autenticado.
 
 ### Body
 ```json
@@ -442,119 +158,85 @@ Content-Type: application/json
   "amount": 150.75,
   "date": "2026-03-16",
   "type": "VENDA",
-  "note": "Receita de serviço prestado"
+  "note": "Receita de servico prestado"
 }
 ```
 
-### Validações
-- amount: number, positivo
-- date: string válida em formato de data
-- type: VENDA | SERVICO | OUTROS
-- note: string opcional
+Validacoes: `amount` numero positivo; `date` string conversivel em data; `type` `VENDA`, `SERVICO` ou `OUTROS`; `note` string opcional.
 
-### Resposta de sucesso (201)
+### Resposta de sucesso: 201
+Retorna `id`, `amount`, `date`, `type`, `note` e `createdAt`.
+
+## 12) PUT /revenue
+Atualiza completamente uma receita pertencente ao MEI autenticado.
+
+### Body
 ```json
 {
-  "id": "uuid",
-  "amount": 150.75,
-  "date": "2026-03-16T00:00:00.000Z",
-  "type": "VENDA",
-  "note": "Receita de serviço prestado",
-  "createdAt": "2026-07-08T00:00:00.000Z"
+  "id": "1c4a0f91-f17f-4a8a-8f43-37c8a4f0f6cf",
+  "amount": 200.5,
+  "date": "2026-03-20",
+  "type": "SERVICO",
+  "note": "Receita atualizada"
 }
 ```
 
-### Possíveis erros
-- 401: token inválido ou ausente
-- 400: validação do schema
-- 400: MEI não encontrado
+Validacoes: `id` UUID obrigatorio; `amount` positivo; `date` valida; `type` `VENDA`, `SERVICO` ou `OUTROS`; `note` string, `null` ou ausente.
 
----
+### Resposta de sucesso: 200
+Retorna `id`, `amount`, `date`, `type`, `note` e `createdAt`.
 
-## 12) GET /revenues
-### Objetivo
-Listar as receitas de um MEI.
+Erros possiveis: `401` para autenticacao; `400` para validacao, MEI/receita inexistente ou receita pertencente a outro usuario.
 
-### Headers
-```http
-Authorization: Bearer <token>
-```
+## 13) GET /revenues
+Lista as receitas do MEI do usuario autenticado. Nao exige `meiId`.
 
-### Query params
+### Query params opcionais
+- `month`: numero do mes, usado junto com `year`
+- `year`: ano, usado junto com `month`
+
 ```text
-meiId=<uuid-do-mei>
+GET /revenues
+GET /revenues?month=3&year=2026
 ```
 
-### Exemplo
-```text
-GET /revenues?meiId=2f8d4c7d-6b65-4d2d-a0d5-c2b442a5f982
-```
+O filtro e aplicado somente quando `month` e `year` sao informados; os valores sao convertidos com `Number()` e nao ha validacao de faixa ou formato. Por exemplo, `month=3&year=2026` filtra de 1 de marco (inclusive) ate 1 de abril (exclusive). Retorna uma lista com `id`, `meiId`, `amount`, `type`, `date`, `note` e `createdAt`.
 
-### Resposta de sucesso (200)
-```json
-[
-  {
-    "id": "uuid",
-    "meiId": "uuid",
-    "amount": 150.75,
-    "type": "VENDA",
-    "date": "2026-03-16T00:00:00.000Z",
-    "note": "Receita de serviço prestado",
-    "createdAt": "2026-07-08T00:00:00.000Z"
-  }
-]
-```
+Erros possiveis: `401` para autenticacao; `400` se usuario/MEI nao for encontrado ou ocorrer falha na consulta.
 
-### Possíveis erros
-- 401: token inválido ou ausente
-- 400: validação do schema
-- 400: MEI não encontrado
-- 400: erro interno ao buscar receitas
+## 14) GET /revenue/:id
+Busca uma receita especifica, somente se pertencer ao MEI autenticado.
 
----
-
-## 13) GET /revenue/:id
-### Objetivo
-Buscar uma receita específica, garantindo que ela pertença ao MEI do usuário autenticado.
-
-### Headers
-```http
-Authorization: Bearer <token>
-```
-
-### Parâmetros de rota
-```text
-id: uuid-da-receita
-```
-
-### Exemplo
 ```text
 GET /revenue/1c4a0f91-f17f-4a8a-8f43-37c8a4f0f6cf
 ```
 
-### Resposta de sucesso (200)
+Retorna `id`, `meiId`, `amount`, `date`, `type`, `note` e `createdAt`.
+
+Erros possiveis: `401` para autenticacao; `400` para ID/MEI/receita inexistente ou falta de autorizacao.
+
+## 15) DELETE /revenue/remuv
+Exclui uma receita pertencente ao MEI autenticado. O caminho registrado atualmente e `/revenue/remuv`.
+
+### Query param obrigatorio
+```text
+revenue_id=<uuid-da-receita>
+```
+
+```text
+DELETE /revenue/remuv?revenue_id=1c4a0f91-f17f-4a8a-8f43-37c8a4f0f6cf
+```
+
+### Resposta de sucesso: 200
 ```json
 {
-  "id": "1c4a0f91-f17f-4a8a-8f43-37c8a4f0f6cf",
-  "meiId": "2f8d4c7d-6b65-4d2d-a0d5-c2b442a5f982",
-  "amount": 150.75,
-  "date": "2026-03-16T00:00:00.000Z",
-  "type": "VENDA",
-  "note": "Receita de serviço prestado",
-  "createdAt": "2026-07-08T00:00:00.000Z"
+  "message": "Receita deletada com sucesso!"
 }
 ```
 
-### Possíveis erros
-- 401: token inválido ou ausente
-- 400: validação do schema
-- 400: receita não encontrada
-- 400: não autorizado
+Erros possiveis: `401` para autenticacao; `400` para validacao, MEI/receita inexistente, falta de autorizacao ou falha ao deletar.
 
----
-
-## Observações gerais
-- O projeto usa o header Authorization com o formato Bearer <token> para todas as rotas autenticadas.
-- O middleware validateSchema valida body, query e params de forma centralizada.
-- O middleware isAuthenticated injeta o identificador do usuário em req.user_id para os services.
-- As rotas de atualização completa (`PUT`) exigem todos os campos definidos nos respectivos schemas.
+## Observacoes gerais
+- A API usa JSON, CORS e a porta definida por `PORT`, com `3333` como padrao.
+- `validateSchema` valida body, query e params e retorna `400` com detalhes quando o Zod falha.
+- O middleware global retorna `400` para instancias de `Error`; falhas inesperadas retornam `500`.

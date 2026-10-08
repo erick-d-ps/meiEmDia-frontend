@@ -3,16 +3,24 @@
 import { apiClient } from "@/lib/api";
 import { RevenueType } from "@/lib/types";
 import { getToken } from "@/lib/auth";
+import { parseBrazilianCurrency } from "@/lib/currency";
 
 export async function CreateRevenue(formdata: FormData) {
   try {
     const token = await getToken();
-    const amount = Number(String(formdata.get("amount")).replace(",", ".")); 
+    const amount = parseBrazilianCurrency(formdata.get("amount"));
     const type = formdata.get("type") as string;
     const date = formdata.get("date") as string;
     const note = (formdata.get("note") ?? "") as string;
 
-    if(!amount || !type || !date){
+    if (amount === null) {
+      return {
+        success: false,
+        message: "Informe um valor maior que zero com até duas casas decimais.",
+      };
+    }
+
+    if (!type || !date) {
        return {
         success: false,
         message: "Preencha todos os campos obrigatórios."
@@ -73,9 +81,14 @@ export async function UpdateRevenue(
   try {
     const token = await getToken();
 
-    const amount = Number(
-      String(formData.get("amount")).replace(",", ".")
-    );
+    const amount = parseBrazilianCurrency(formData.get("amount"));
+
+    if (amount === null) {
+      return {
+        success: false,
+        message: "Informe um valor maior que zero com até duas casas decimais.",
+      };
+    }
 
     const date = String(formData.get("date"));
     const type = String(formData.get("type"));

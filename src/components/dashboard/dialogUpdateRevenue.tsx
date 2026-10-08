@@ -24,6 +24,7 @@ import {
 } from "../ui/select";
 
 import { UpdateRevenue } from "@/actions/documentsRevenue";
+import { formatBrazilianCurrency } from "@/lib/currency";
 import { toast } from "sonner";
 
 interface Revenue {
@@ -93,7 +94,7 @@ export function RevenueUpdate({ revenue, open, onOpenChange }: RevenueProps) {
                 id="amount"
                 name="amount"
                 type="text"
-                defaultValue={revenue.amount}
+                defaultValue={formatBrazilianCurrency(revenue.amount)}
                 placeholder="EX: 100,00"
                 className="border-border"
               />

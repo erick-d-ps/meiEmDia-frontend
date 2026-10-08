@@ -69,12 +69,12 @@ Dashboard:
 
 As Server Actions em `src/actions/documentsRevenue.ts` implementam:
 
-- `CreateRevenue`: `POST /revenue` com `amount`, `date`, `type` e `note` opcional. Converte vírgula decimal substituindo-a por ponto.
+- `CreateRevenue`: `POST /revenue` com `amount`, `date`, `type` e `note` opcional. Usa `parseBrazilianCurrency` de `src/lib/currency.ts` para validar e converter valores positivos no formato brasileiro para número.
 - `SearchHistory(month, year)`: `GET /revenues?month={month}&year={year}`.
-- `UpdateRevenue(id, formData)`: `PUT /revenue` com `id`, `amount`, `date`, `type` e `note`.
+- `UpdateRevenue(id, formData)`: `PUT /revenue` com `id`, `amount`, `date`, `type` e `note`; aplica a mesma validação e conversão monetária da criação.
 - `DeleteRevenue(id)`: `DELETE /revenue/remuv?revenue_id={id}`.
 
-Tipos de receita usados pela interface: `VENDA`, `SERVICO` e `OUTROS`. Valores são exibidos em BRL e datas em formato brasileiro. A tabela de histórico mostra a lista do período e tem campo de busca apenas visual, sem filtragem. A edição abre dialog e mostra toast de sucesso/erro; a lista não recebe atualização explícita após editar. A exclusão pede confirmação e remove o item da lista local após sucesso, mas não apresenta feedback de erro/sucesso nessa tabela. O resumo da página inicial e o relatório calculam os agregados a partir da resposta de `SearchHistory`.
+Tipos de receita usados pela interface: `VENDA`, `SERVICO` e `OUTROS`. A conversão aceita números inteiros e valores brasileiros com até duas casas decimais, incluindo separador de milhar, e bloqueia valores inválidos ou não positivos antes da chamada à API. Na edição, `formatBrazilianCurrency` exibe o valor retornado pela API no formato brasileiro. Valores da tabela e do relatório são exibidos em BRL e datas em formato brasileiro. A tabela de histórico mostra a lista do período e tem campo de busca apenas visual, sem filtragem. A edição abre dialog e mostra toast de sucesso/erro; a lista não recebe atualização explícita após editar. A exclusão pede confirmação e remove o item da lista local após sucesso, mas não apresenta feedback de erro/sucesso nessa tabela. O resumo da página inicial e o relatório calculam os agregados a partir da resposta de `SearchHistory`.
 
 ### Relatório
 
@@ -97,7 +97,7 @@ Há divergências entre `endpoints.md` e as chamadas atuais do frontend. Não al
 - A documentação de `GET /revenues` descreve `meiId`; o frontend envia `month` e `year`.
 - `endpoints.md` descreve somente `GET /revenue/:id` além de criação e listagem, sem documentar as chamadas de edição (`PUT /revenue`) e exclusão (`DELETE /revenue/remuv?revenue_id=...`). A rota `remuv` parece ter erro de grafia, mas isso não foi confirmado no backend.
 - A exclusão usa query `revenue_id`, enquanto o formato de recurso por ID descrito na documentação é `/revenue/:id`.
-- A action de criação converte formatos como `1.500,50` em `1.500.50` antes de `Number()`, produzindo valor incorreto (`NaN`). No formulário de edição, valores com ponto decimal podem ser convertidos incorretamente pelo mesmo tratamento simplificado. Revisar a conversão e confirmar formatos aceitos pela API.
+- A conversão monetária de cadastro e edição é centralizada em `src/lib/currency.ts`; a API continua recebendo `amount` como número positivo.
 - `RevenueType` em `src/lib/types.ts` tipa `amount` como `string` e nomeia a data de criação como `creatAt`; respostas e usos devem ser conferidos com o contrato real.
 
 `endpoints.md` lista `POST /user`, `POST /session`, `GET /me`, operações de MEI e contador, e `POST /revenue`; consulte-o e o backend antes de alterar essas integrações. O arquivo pode estar desatualizado em relação às rotas de receitas consumidas.
