@@ -1,9 +1,10 @@
 
+import { MonthlyReport } from "./_components/monthlyReport";
 
-export default function Reports(){
-   return(
-     <div>
-        <h1>Pagina Relatorios</h1>
-     </div>
-   ) 
+export default function Reports() {
+  return (
+    <main className="flex flex-col gap-4">
+      <MonthlyReport />
+    </main>
+  );
 }
