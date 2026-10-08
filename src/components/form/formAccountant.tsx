@@ -38,8 +38,9 @@ export function FormAccountant({ mei, initialAccountant }: FormAccountantProps) 
     if (state?.data) {
       setFormValues({
         name: state.data.name,
-        email: state.data.email,
-        phone: state.data.phone,
+
+        email: state.data.email ?? "",
+        phone: state.data.phone ?? "",
       });
     }
   }, [state?.data]);

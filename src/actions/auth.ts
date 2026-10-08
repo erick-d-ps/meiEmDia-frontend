@@ -62,9 +62,16 @@ export async function loginAction(
     return { success: true, error: "", redirectTo: "/dashboard" };
   } catch (err) {
     if (err instanceof Error) {
-      const error = JSON.parse(err.message);
+      const error = JSON.parse(err.message) as {
+        message?: string;
+        status?: number;
+      };
 
-      if (error.status === 401) {
+      if (
+        error.status === 401 ||
+        (error.status === 400 &&
+          /senha ou email invalido/i.test(error.message ?? ""))
+      ) {
         return {
           success: false,
           error: "Email ou senha inválidos",

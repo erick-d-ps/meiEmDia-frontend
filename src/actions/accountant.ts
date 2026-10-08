@@ -141,7 +141,7 @@ export async function getAccountant(): Promise<Accountant | null> {
   }
 
   try {
-    return await apiClient<Accountant>("/accountant", {
+    return await apiClient<Accountant | null>("/accountant", {
       method: "GET",
       token,
       cache: "no-store",

@@ -1,6 +1,6 @@
 # Contexto do frontend
 
-Documento técnico do frontend `mei-em-dia`, revisado em outubro de 2026 a partir do código desta pasta. Descreve o comportamento observado no repositório; contratos de API que divergem de `endpoints.md` estão destacados para confirmação no backend.
+Documento técnico do frontend `mei-em-dia`, revisado em outubro de 2026 a partir do código desta pasta e comparado com as rotas, schemas e respostas atuais do backend.
 
 ## Visão geral
 
@@ -47,7 +47,7 @@ Dashboard:
 
 ## Autenticação e API
 
-- `src/actions/auth.ts`: `registerAction` envia `POST /user`; `loginAction` envia `POST /session`; `logoutAction` remove o cookie e redireciona para `/login`.
+- `src/actions/auth.ts`: `registerAction` envia `POST /user`; `loginAction` envia `POST /session`; `logoutAction` remove o cookie e redireciona para `/login`. O backend responde `400` também para credenciais inválidas; o frontend reconhece a mensagem do backend e a apresenta como erro de credenciais.
 - O token é guardado no cookie HTTP-only `token_MeiEmDia` por `src/lib/auth.ts`, com validade de sete dias, `sameSite: "lax"`, `path: "/"` e `secure` em produção. O token não deve ser exposto no cliente.
 - `getUser()` consulta `GET /me`; `AuthenticatedUser()` redireciona para `/login` quando não encontra sessão válida.
 - `src/lib/api.ts` centraliza `fetch`, concatena `NEXT_PUBLIC_API_URL`, define JSON como content type e envia `Authorization: Bearer` quando recebe token. Erros HTTP são lançados como `Error` com mensagem e status serializados.
@@ -57,11 +57,11 @@ Dashboard:
 
 ### MEI
 
-`getMei()` consulta `GET /mei` sem cache e trata HTTP 400 como ausência de cadastro. `saveMeiAction` cria com `POST /mei` ou atualiza com `PUT /mei`. Envia CNPJ/CPF apenas com dígitos, estado em maiúsculas e os campos de empresa, titular, localização, CNAE, atividade (`SERVICO`, `COMERCIO`, `MISTO`) e `hasAccountant`. A action valida presença e comprimentos básicos antes da chamada.
+`getMei()` consulta `GET /mei` sem cache e retorna `Mei | null`; o backend responde `null` com HTTP 200 quando ainda não existe cadastro. `saveMeiAction` cria com `POST /mei` ou atualiza com `PUT /mei`. Envia CNPJ/CPF apenas com dígitos, estado em maiúsculas e os campos de empresa, titular, localização, CNAE, atividade (`SERVICO`, `COMERCIO`, `MISTO`) e `hasAccountant`. A action valida presença e comprimentos básicos antes da chamada.
 
 ### Contador
 
-`/dashboard/accountant` carrega MEI e contador em paralelo. `getAccountant()` consulta `GET /accountant` sem cache e trata como ausência apenas o erro 400 cuja mensagem indica contador não encontrado. O formulário exige `hasAccountant = true`, permite editar nome, e-mail e telefone e salva por `POST /accountant` ou `PUT /accountant`; o telefone é enviado somente com dígitos.
+`/dashboard/accountant` carrega MEI e contador em paralelo. Se `GET /mei` retornar `null`, redireciona para `/dashboard/mei-data`; se o MEI indicar que não possui contador, a tela apresenta esse estado e um link para atualizar os dados do MEI. `getAccountant()` consulta `GET /accountant` sem cache e trata `null` como ausência de cadastro. O formulário permite editar nome, e-mail e telefone e salva por `POST /accountant` ou `PUT /accountant`; o telefone é enviado somente com dígitos. E-mail e telefone são anuláveis no modelo do banco, mas obrigatórios pelos schemas atuais de escrita.
 
 ### Período e receitas
 
@@ -90,26 +90,20 @@ Tipos de receita usados pela interface: `VENDA`, `SERVICO` e `OUTROS`. A convers
 
 Em `/dashboard/settings`, os links de dados do MEI e contador funcionam. “Minha conta”, “Exportar dados”, “Plano” e “Segurança” apontam para `/`. O botão “Excluir conta” não tem handler nem integração. `MeiStatus` e `AlertMessage` exibem conteúdo estático; não consultam pendências reais.
 
-## Contratos que precisam de confirmação no backend
+## Contratos da API confirmados
 
-Há divergências entre `endpoints.md` e as chamadas atuais do frontend. Não alterar o contrato com base apenas neste documento; confirmar a implementação do backend antes de mudar:
-
-- A documentação de `GET /revenues` descreve `meiId`; o frontend envia `month` e `year`.
-- `endpoints.md` descreve somente `GET /revenue/:id` além de criação e listagem, sem documentar as chamadas de edição (`PUT /revenue`) e exclusão (`DELETE /revenue/remuv?revenue_id=...`). A rota `remuv` parece ter erro de grafia, mas isso não foi confirmado no backend.
-- A exclusão usa query `revenue_id`, enquanto o formato de recurso por ID descrito na documentação é `/revenue/:id`.
-- A conversão monetária de cadastro e edição é centralizada em `src/lib/currency.ts`; a API continua recebendo `amount` como número positivo.
-- `RevenueType` em `src/lib/types.ts` tipa `amount` como `string` e nomeia a data de criação como `creatAt`; respostas e usos devem ser conferidos com o contrato real.
-
-`endpoints.md` lista `POST /user`, `POST /session`, `GET /me`, operações de MEI e contador, e `POST /revenue`; consulte-o e o backend antes de alterar essas integrações. O arquivo pode estar desatualizado em relação às rotas de receitas consumidas.
+- As rotas de receita estão alinhadas entre frontend e backend: `POST /revenue`, `PUT /revenue`, `GET /revenues?month=...&year=...` e `DELETE /revenue/remuv?revenue_id=...`. O backend também oferece `GET /revenue/:id`, mas o frontend atual não o consome.
+- Criação e edição enviam `amount` como número positivo, `date` como string, `type` como `VENDA`, `SERVICO` ou `OUTROS`, e `note` opcional; a edição inclui `id`. A conversão brasileira é centralizada em `src/lib/currency.ts`.
+- O banco usa `Decimal(10,2)` para `Revenue.amount`; o JSON do Prisma o serializa como string. Datas e `createdAt` são strings ISO no JSON. Listagem e consulta por ID incluem `meiId`; criação e atualização não o selecionam. `note` pode ser `null`.
+- `GET /mei` retorna `null` com status 200 quando não há MEI; `GET /accountant` retorna `null` quando não há MEI ou contador. `fantasyName`, `email` e `phone` podem ser nulos no banco/respostas.
+- Os tipos em `src/lib/types.ts` refletem os nomes de resposta `createdAt` e as nulabilidades acima. Os schemas atuais de escrita de contador continuam exigindo e-mail e telefone, embora as colunas correspondentes permitam `null`.
 
 ## Tipos e layout
 
-`src/lib/types.ts` define `User`, `AuthUser`, `Mei`, `Accountant`, `RevenueType` e `FormActionState`. O layout raiz define `lang="pt-BR"`, fontes Geist, metadados ainda genéricos (“Create Next App”) e o `Toaster` global do Sonner. Embora `next-themes` esteja instalado, a aplicação não está envolvida por um provider de tema.
+`src/lib/types.ts` define `User`, `AuthUser`, `Mei`, `Accountant`, `RevenueType`, `RevenueCategory` e `FormActionState`. `RevenueType.amount` é string na resposta JSON do Prisma, apesar de ser enviado como número nas operações de escrita. O layout raiz define `lang="pt-BR"`, fontes Geist, metadados ainda genéricos (“Create Next App”) e o `Toaster` global do Sonner. Embora `next-themes` esteja instalado, a aplicação não está envolvida por um provider de tema.
 
 ## Pendências conhecidas
 
-- Confirmar e documentar os contratos de listagem, atualização e exclusão de receitas com o backend.
-- Corrigir a conversão de valores monetários e verificar os tipos de resposta de receita.
 - Conectar o atalho de relatório e atualizar a tabela depois de editar uma receita.
 - Implementar filtragem no campo de busca da tabela.
 - Integrar upload de documentos quando houver contrato de backend.

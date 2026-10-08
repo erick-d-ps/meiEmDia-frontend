@@ -140,7 +140,7 @@ Specs:
 - **Intenção (por quê):** Restringir dados empresariais e financeiros à pessoa autenticada.
 - **Contexto:** O produto possui páginas públicas de cadastro e login e uma área autenticada.
 - **Atores:** Pessoa visitante e pessoa com conta.
-- **Descrição do comportamento:** O cadastro recebe nome, e-mail e senha e envia os dados para criação da conta. Após sucesso, direciona ao login. O login recebe e-mail e senha; em sucesso, inicia sessão e direciona ao dashboard. Erros de credenciais e validação são apresentados como mensagens. Ao sair, a sessão é encerrada e a pessoa volta ao login. Ao acessar uma rota protegida sem sessão válida, deve ser direcionada ao login.
+- **Descrição do comportamento:** O cadastro recebe nome, e-mail e senha e envia os dados para criação da conta. Após sucesso, direciona ao login. O login recebe e-mail e senha; em sucesso, inicia sessão e direciona ao dashboard. Erros de credenciais e validação são apresentados como mensagens; credenciais inválidas são reconhecidas pela mensagem do backend, que responde com status 400. Ao sair, a sessão é encerrada e a pessoa volta ao login. Ao acessar uma rota protegida sem sessão válida, deve ser direcionada ao login.
 - **Entradas e saídas:** Nome, e-mail e senha no cadastro; e-mail e senha no login. Saídas: confirmação ou mensagem de erro e navegação para login ou dashboard.
 - **Dados/entidades envolvidos (conceitual):** Conta de usuário com nome, e-mail e credencial; sessão autenticada.
 - **Estados e transições:** Visitante → cadastro concluído → login; pessoa não autenticada → login bem-sucedido → área autenticada; pessoa autenticada → logout → login.
@@ -158,6 +158,7 @@ Specs:
   - Dado que a pessoa informa dados aceitos, quando conclui cadastro, então recebe confirmação e pode seguir ao login.
   - Dado que a pessoa informa credenciais válidas, quando entra, então chega à área autenticada.
   - Dado que a pessoa informa credenciais inválidas, quando tenta entrar, então recebe erro e não obtém acesso.
+  - Dado que o backend retorna status 400 com a mensagem de credenciais inválidas, quando o login falha, então a interface informa que o e-mail ou a senha estão incorretos.
   - Dado que não existe sessão válida, quando a pessoa acessa uma área protegida, então é encaminhada ao login.
   - Dado que a pessoa está autenticada, quando encerra sessão, então volta ao login e perde acesso protegido.
 - **Definição de pronto:** Cadastro, login, logout e barreira de acesso apresentam os resultados e erros descritos.
@@ -171,7 +172,7 @@ Specs:
 - **Intenção (por quê):** Manter os dados básicos do negócio disponíveis para a própria pessoa e contextualizar os registros de receita.
 - **Contexto:** O cadastro só pode ser usado por pessoa autenticada. O contador está associado ao MEI e seu fluxo depende da indicação de contador.
 - **Atores:** Pessoa autenticada responsável pelo MEI.
-- **Descrição do comportamento:** Ao abrir a seção do MEI, o sistema carrega os dados existentes. Se não houver, mostra formulário de cadastro; caso haja, permite edição. O formulário cobre identificação da empresa, titular, localização, CNAE, atividade e indicação de contador. Se a pessoa indicar contador, pode abrir a seção de contador, consultar os dados existentes ou cadastrar nome, e-mail e telefone; se já houver registro, pode editá-lo. Sucesso ou falha de salvamento deve ser comunicado.
+- **Descrição do comportamento:** Ao abrir a seção do MEI, o sistema carrega os dados existentes. Se não houver, mostra formulário de cadastro; caso haja, permite edição. O formulário cobre identificação da empresa, titular, localização, CNAE, atividade e indicação de contador. Se a pessoa indicar contador, pode abrir a seção de contador, consultar os dados existentes ou cadastrar nome, e-mail e telefone; se já houver registro, pode editá-lo. Se acessar a seção do contador sem MEI cadastrado, é direcionada ao cadastro do MEI; se o MEI indicar que não possui contador, a tela informa isso e oferece acesso para atualizar os dados do MEI. Sucesso ou falha de salvamento deve ser comunicado.
 - **Entradas e saídas:** Dados do MEI: CNPJ, razão social, nome fantasia opcional, titular, CPF, estado, cidade, CNAE, tipo de atividade e existência de contador. Dados do contador: nome, e-mail e telefone. Saída: dados salvos ou mensagem de validação/erro.
 - **Dados/entidades envolvidos (conceitual):** Perfil empresarial do MEI e contato do contador vinculado.
 - **Estados e transições:** MEI ausente → formulário de cadastro → MEI salvo; MEI existente → formulário preenchido → MEI atualizado. Contador ausente com indicação habilitada → cadastro → contador salvo; contador existente → edição → contador atualizado.
@@ -183,13 +184,14 @@ Specs:
   3. A pessoa preenche ou altera os campos e salva.
   4. A pessoa indica se possui contador.
   5. Se houver contador, abre a seção correspondente, consulta ou preenche os dados e salva.
-- **Casos de borda e erros:** Sem sessão válida, não deve concluir salvamento; dados inválidos devem indicar erro e preservar os dados já exibidos quando possível; ausência de MEI impede a consulta de contador; erro de rede ou API deve ser informado.
+- **Casos de borda e erros:** Sem sessão válida, não deve concluir salvamento; dados inválidos devem indicar erro e preservar os dados já exibidos quando possível; ausência de MEI ao acessar a seção de contador redireciona para o cadastro do MEI; MEI sem contador habilitado mostra o estado informativo; erro de rede ou API deve ser informado.
 - **Impacto no existente:** Alimenta as telas de MEI e contador e fornece o vínculo empresarial esperado nas operações autenticadas.
 - **Critérios de aceite (Dado/Quando/Então):**
   - Dado que não existe MEI, quando a pessoa abre a seção, então pode preencher e salvar os dados obrigatórios.
   - Dado que existe MEI, quando a pessoa abre a seção, então os dados são apresentados e podem ser atualizados.
   - Dado que há campos obrigatórios inválidos, quando a pessoa salva, então o sistema impede o envio e apresenta erro.
   - Dado que o MEI indica possuir contador, quando a pessoa abre a seção de contador, então pode cadastrar ou atualizar nome, e-mail e telefone.
+  - Dado que a pessoa abre a seção de contador sem possuir MEI, quando a página carrega, então é direcionada ao cadastro do MEI.
   - Dado que a API rejeita o salvamento, quando a operação termina, então a pessoa recebe uma mensagem de erro.
 - **Definição de pronto:** Consulta, criação e atualização do MEI e do contador cobrem estados vazio, preenchido, sucesso e erro com as validações acima.
 - **Dependências:** Spec 01 — é necessário estar autenticado.

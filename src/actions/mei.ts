@@ -75,7 +75,11 @@ export async function saveMeiAction(
     const data = {
       cnpj: onlyDigits(getFieldValue(formData, "cnpj", existingMei?.cnpj)),
       companyName: getFieldValue(formData, "companyName", existingMei?.companyName),
-      fantasyName: getFieldValue(formData, "fantasyName", existingMei?.fantasyName),
+      fantasyName: getFieldValue(
+        formData,
+        "fantasyName",
+        existingMei?.fantasyName ?? "",
+      ),
       ownerName: getFieldValue(formData, "ownerName", existingMei?.ownerName),
       cpf: onlyDigits(getFieldValue(formData, "cpf", existingMei?.cpf)),
       state: getFieldValue(formData, "state", existingMei?.state).toUpperCase(),
@@ -184,7 +188,7 @@ export async function getMei(): Promise<Mei | null> {
   }
 
   try {
-    return await apiClient<Mei>("/mei", {
+    return await apiClient<Mei | null>("/mei", {
       method: "GET",
       token,
       cache: "no-store",

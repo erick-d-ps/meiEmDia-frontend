@@ -113,7 +113,7 @@ export function MeiDataForm({ initialMei }: MeiDataFormProps) {
                       id="fantasyName"
                       name="fantasyName"
                       placeholder="Digite o nome fantasia"
-                      defaultValue={initialMei?.fantasyName}
+                      defaultValue={initialMei?.fantasyName ?? ""}
                       minLength={3}
                     />
                   </div>

@@ -2,7 +2,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  createAt: string;
+  createdAt: string;
 }
 
 export interface AuthUser {
@@ -18,7 +18,7 @@ export interface Mei {
   id: string;
   cnpj: string;
   companyName: string;
-  fantasyName?: string;
+  fantasyName: string | null;
   ownerName: string;
   cpf: string;
   state: string;
@@ -31,8 +31,8 @@ export interface Mei {
 export interface Accountant {
   id?: string;
   name: string;
-  email: string;
-  phone: string;
+  email: string | null;
+  phone: string | null;
   createdAt?: string;
 }
 
@@ -43,11 +43,14 @@ export interface FormActionState {
   redirectTo?: string;
 }
 
+export type RevenueCategory = "VENDA" | "SERVICO" | "OUTROS";
+
 export interface RevenueType {
   id: string;
+  meiId?: string;
   amount: string;
   date: string;
-  type: string;
-  note: string;
-  creatAt: string;
+  type: RevenueCategory;
+  note: string | null;
+  createdAt: string;
 }

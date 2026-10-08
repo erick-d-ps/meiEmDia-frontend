@@ -93,7 +93,7 @@ Retorna o MEI criado com `id` e os campos enviados.
 Erros possiveis: `401` para autenticacao; `400` para validacao, usuario inexistente ou MEI ja cadastrado.
 
 ## 5) GET /mei
-Retorna o MEI associado ao usuario autenticado, com `id`, `cnpj`, `companyName`, `fantasyName`, `ownerName`, `cpf`, `state`, `city`, `mainActivityCNAE`, `activityType` e `hasAccountant`. Se o usuario ainda nao tiver MEI cadastrado, retorna `null` com status `200`.
+Retorna o MEI associado ao usuario autenticado, com `id`, `cnpj`, `companyName`, `fantasyName`, `ownerName`, `cpf`, `state`, `city`, `mainActivityCNAE`, `activityType` e `hasAccountant`. `fantasyName` pode ser `null`. Se o usuario ainda nao tiver MEI cadastrado, retorna `null` com status `200`.
 
 Erros possiveis: `401` para autenticacao.
 
@@ -131,7 +131,7 @@ Retorna `id`, `name`, `email`, `phone` e `createdAt`.
 Erros possiveis: `401` para autenticacao; `400` para validacao, MEI inexistente ou contador ja cadastrado.
 
 ## 9) GET /accountant
-Retorna o contador do MEI autenticado, com `name`, `email`, `phone` e `createdAt`. Se o usuario nao tiver MEI ou contador cadastrado, retorna `null` com status `200`.
+Retorna o contador do MEI autenticado, com `name`, `email`, `phone` e `createdAt`. `email` e `phone` podem ser `null` em registros existentes. Se o usuario nao tiver MEI ou contador cadastrado, retorna `null` com status `200`.
 
 Erros possiveis: `401` para autenticacao.
 
@@ -165,7 +165,7 @@ Cria uma receita vinculada ao MEI autenticado.
 Validacoes: `amount` numero positivo; `date` string conversivel em data; `type` `VENDA`, `SERVICO` ou `OUTROS`; `note` string opcional.
 
 ### Resposta de sucesso: 201
-Retorna `id`, `amount`, `date`, `type`, `note` e `createdAt`.
+Retorna `id`, `amount`, `date`, `type`, `note` e `createdAt`. `amount` e um `Decimal` no banco e e serializado pelo Prisma como string no JSON; `date` e `createdAt` sao strings ISO e `note` pode ser `null`.
 
 ## 12) PUT /revenue
 Atualiza completamente uma receita pertencente ao MEI autenticado.
@@ -184,7 +184,7 @@ Atualiza completamente uma receita pertencente ao MEI autenticado.
 Validacoes: `id` UUID obrigatorio; `amount` positivo; `date` valida; `type` `VENDA`, `SERVICO` ou `OUTROS`; `note` string, `null` ou ausente.
 
 ### Resposta de sucesso: 200
-Retorna `id`, `amount`, `date`, `type`, `note` e `createdAt`.
+Retorna `id`, `amount`, `date`, `type`, `note` e `createdAt`. `amount` e um `Decimal` no banco e e serializado pelo Prisma como string no JSON; `date` e `createdAt` sao strings ISO e `note` pode ser `null`.
 
 Erros possiveis: `401` para autenticacao; `400` para validacao, MEI/receita inexistente ou receita pertencente a outro usuario.
 
@@ -200,7 +200,7 @@ GET /revenues
 GET /revenues?month=3&year=2026
 ```
 
-O filtro e aplicado somente quando `month` e `year` sao informados; os valores sao convertidos com `Number()` e nao ha validacao de faixa ou formato. Por exemplo, `month=3&year=2026` filtra de 1 de marco (inclusive) ate 1 de abril (exclusive). Retorna uma lista com `id`, `meiId`, `amount`, `type`, `date`, `note` e `createdAt`.
+O filtro e aplicado somente quando `month` e `year` sao informados; os valores sao convertidos com `Number()` e nao ha validacao de faixa ou formato. Por exemplo, `month=3&year=2026` filtra de 1 de marco (inclusive) ate 1 de abril (exclusive). Retorna uma lista com `id`, `meiId`, `amount`, `type`, `date`, `note` e `createdAt`. `amount` e serializado como string pelo Prisma; `date` e `createdAt` sao strings ISO e `note` pode ser `null`.
 
 Erros possiveis: `401` para autenticacao; `400` se usuario/MEI nao for encontrado ou ocorrer falha na consulta.
 
@@ -211,7 +211,7 @@ Busca uma receita especifica, somente se pertencer ao MEI autenticado.
 GET /revenue/1c4a0f91-f17f-4a8a-8f43-37c8a4f0f6cf
 ```
 
-Retorna `id`, `meiId`, `amount`, `date`, `type`, `note` e `createdAt`.
+Retorna `id`, `meiId`, `amount`, `date`, `type`, `note` e `createdAt`. `amount` e serializado como string pelo Prisma; `date` e `createdAt` sao strings ISO e `note` pode ser `null`.
 
 Erros possiveis: `401` para autenticacao; `400` para ID/MEI/receita inexistente ou falta de autorizacao.
 
