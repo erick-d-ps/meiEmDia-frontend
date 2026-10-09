@@ -16,7 +16,7 @@ import { RevenueRegister } from "@/components/dashboard/dialogRevenueRegister";
 import { DocumentRegister } from "./dialogDocumentRegister";
 
 export function RecordInvoices() {
-  const { selectedDate } = useContext(DashboardContext);
+  const { selectedDate, revenueRevision } = useContext(DashboardContext);
 
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [releasesRevenue, setReleasesRevenue] = useState(0);
@@ -65,7 +65,7 @@ export function RecordInvoices() {
     }
 
     loadRevenue();
-  }, [selectedDate]);
+  }, [selectedDate, revenueRevision]);
 
   return (
     <main className="flex w-full flex-col gap-2">

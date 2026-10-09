@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "../ui/button";
@@ -24,6 +24,7 @@ import {
 } from "../ui/select";
 
 import { UpdateRevenue } from "@/actions/documentsRevenue";
+import { DashboardContext } from "@/context";
 import { formatBrazilianCurrency } from "@/lib/currency";
 import { toast } from "sonner";
 
@@ -48,6 +49,7 @@ const items = [
 ];
 
 export function RevenueUpdate({ revenue, open, onOpenChange }: RevenueProps) {
+  const { refreshRevenues } = useContext(DashboardContext);
   const [type, setType] = useState(revenue.type);
 
   useEffect(() => {
@@ -65,6 +67,7 @@ export function RevenueUpdate({ revenue, open, onOpenChange }: RevenueProps) {
 
     if (result?.success) {
       onOpenChange(false);
+      refreshRevenues();
 
       toast.success("Receita atualizada com sucesso!");
     } else {

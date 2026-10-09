@@ -9,6 +9,8 @@ interface DashboardProviderProps {
 interface DashboardContextProps {
   selectedDate: Date | null;
   setSelectedDate: (date: Date) => void;
+  revenueRevision: number;
+  refreshRevenues: () => void;
 }
 
 export const DashboardContext = createContext(
@@ -17,6 +19,11 @@ export const DashboardContext = createContext(
 
 function DashboardProvider({ children }: DashboardProviderProps) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [revenueRevision, setRevenueRevision] = useState(0);
+
+  function refreshRevenues() {
+    setRevenueRevision((revision) => revision + 1);
+  }
 
   useEffect(() => {
     try {
@@ -50,6 +57,8 @@ function DashboardProvider({ children }: DashboardProviderProps) {
       value={{
         selectedDate,
         setSelectedDate,
+        revenueRevision,
+        refreshRevenues,
       }}
     >
       {children}

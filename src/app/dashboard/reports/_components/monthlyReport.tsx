@@ -70,7 +70,7 @@ function getRevenueTypeLabel(type: string) {
 }
 
 export function MonthlyReport() {
-  const { selectedDate } = useContext(DashboardContext);
+  const { selectedDate, revenueRevision } = useContext(DashboardContext);
   const [revenues, setRevenues] = useState<RevenueType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -102,7 +102,7 @@ export function MonthlyReport() {
     }
 
     loadMonthlyReport();
-  }, [selectedDate]);
+  }, [selectedDate, revenueRevision]);
 
   const summary = useMemo(() => {
     const totalsByType = {

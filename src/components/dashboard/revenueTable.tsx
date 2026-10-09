@@ -61,7 +61,8 @@ const revenueTypeConfig = {
 } as const;
 
 export function RevenueTable() {
-  const { selectedDate } = useContext(DashboardContext);
+  const { selectedDate, revenueRevision, refreshRevenues } =
+    useContext(DashboardContext);
 
   const [revenueData, setRevenueData] = useState<RevenueType[]>([]);
 
@@ -90,7 +91,7 @@ export function RevenueTable() {
     }
 
     fetchRevenueData();
-  }, [selectedDate]);
+  }, [selectedDate, revenueRevision]);
 
   const getRevenueTypeLabel = (type: keyof typeof revenueTypeConfig) => {
     return revenueTypeConfig[type]?.label || "";
@@ -243,6 +244,7 @@ export function RevenueTable() {
                       (revenue) => revenue.id !== revenueToDelete.id,
                     ),
                   );
+                  refreshRevenues();
 
                   setRevenueToDelete(null);
                 }

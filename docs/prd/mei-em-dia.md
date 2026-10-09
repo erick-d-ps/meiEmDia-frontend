@@ -204,10 +204,10 @@ Specs:
 - **Intenção (por quê):** Dar à pessoa uma forma consistente de registrar entradas financeiras e manter o histórico correto.
 - **Contexto:** A interface oferece formulário de cadastro, diálogo de edição e confirmação de exclusão. `endpoints.md` documenta os contratos atuais das quatro operações e seus parâmetros.
 - **Atores:** Pessoa autenticada responsável pelo MEI.
-- **Descrição do comportamento:** Para cadastrar, a pessoa informa valor, data, categoria e descrição opcional; após sucesso, recebe confirmação. Para editar, abre a receita selecionada, altera os campos e salva, recebendo confirmação ou erro. Para excluir, confirma a ação; após sucesso, o item é removido da lista exibida. A tabela não implementa busca efetiva. A lista não é atualizada explicitamente após edição no comportamento atual.
+- **Descrição do comportamento:** Para cadastrar, a pessoa informa valor, data, categoria e descrição opcional; após sucesso, recebe confirmação. Para editar, abre a receita selecionada, altera os campos e salva, recebendo confirmação ou erro. Para excluir, confirma a ação; após sucesso, o item é removido da lista exibida. Após qualquer cadastro, edição ou exclusão bem-sucedidos, a tabela, o resumo "Receita no mês" do Dashboard e o relatório recarregam os dados do período selecionado automaticamente, sem atualizar a página. A tabela não implementa busca efetiva.
 - **Entradas e saídas:** Valor positivo, data válida, categoria (venda, serviço ou outros) e descrição opcional. Saída: receita criada/atualizada/excluída ou mensagem de erro.
 - **Dados/entidades envolvidos (conceitual):** Receita com valor, data, categoria e observação opcional, pertencente ao MEI da pessoa autenticada.
-- **Estados e transições:** Formulário → enviando → sucesso com confirmação/fechamento; erro de validação ou API → mensagem e formulário disponível. Exclusão solicitada → confirmação → removida após sucesso ou permanece em caso de falha.
+- **Estados e transições:** Formulário → enviando → sucesso com confirmação/fechamento e atualização das consultas abertas; erro de validação ou API → mensagem e formulário disponível sem atualizar os dados. Exclusão solicitada → confirmação → removida após sucesso e atualização das consultas abertas, ou permanece em caso de falha.
 - **Regras de negócio:** O valor deve ser positivo; data deve ser válida; categoria deve corresponder a uma das três opções; observação é opcional. A receita deve pertencer ao MEI da pessoa autenticada.
 - **Validações:** A API exige valor numérico positivo, data conversível em data e categoria entre venda, serviço e outros. Na edição, o identificador da receita também é obrigatório. A descrição é opcional na criação e aceita string, `null` ou ausência na atualização. O frontend aceita valores no formato brasileiro, com separador de milhar opcional e até duas casas decimais, converte-os em número e impede o envio de valores inválidos ou não positivos.
 - **Fluxo do usuário (passo a passo):**
@@ -217,14 +217,16 @@ Specs:
   4. Para editar, seleciona uma receita, altera seus dados e salva.
   5. Para excluir, seleciona a ação e confirma; o item sai da lista após sucesso.
 - **Casos de borda e erros:** Campo obrigatório ausente impede o envio; valor monetário malformado, com mais de duas casas decimais ou não positivo impede a chamada à API, mantém o texto no formulário e apresenta erro; falha da API apresenta erro; falha na edição mantém a receita disponível; cancelamento da confirmação interrompe a exclusão; falha de exclusão não remove o item da lista.
-- **Impacto no existente:** A tabela mensal e o relatório dependem dos dados retornados por estas operações; a lista não é atualizada explicitamente após edição no comportamento atual.
+- **Impacto no existente:** A tabela mensal, o resumo do Dashboard e o relatório dependem dos dados retornados por estas operações; após qualquer mutação bem-sucedida, as consultas abertas são atualizadas sem recarregar a página.
 - **Critérios de aceite (Dado/Quando/Então):**
   - Dado que valor, data e categoria são válidos, quando a pessoa salva, então a receita é enviada e o sucesso é informado.
   - Dado que a pessoa informa `500,00`, `1.500,50`, `10.000,99` ou `500`, quando salva, então o frontend envia respectivamente um número positivo equivalente para a API.
   - Dado que falta um campo obrigatório, quando tenta salvar, então a operação não é concluída e há mensagem de validação.
   - Dado que a pessoa edita uma receita, quando a API confirma a alteração, então recebe confirmação de sucesso.
+  - Dado que uma receita é cadastrada ou editada com sucesso, quando a operação termina, então a tabela e o resumo "Receita no mês" refletem os dados atualizados sem recarregar a página.
   - Dado que a pessoa inicia a exclusão, quando cancela a confirmação, então a receita permanece.
   - Dado que a pessoa confirma e a API conclui a exclusão, então o item deixa a lista atual.
+  - Dado que uma receita é excluída com sucesso, quando a operação termina, então a tabela e o resumo "Receita no mês" refletem a exclusão sem recarregar a página.
   - Dado que a API falha em qualquer operação, quando a ação termina, então o resultado não é apresentado como sucesso.
 - **Definição de pronto:** Cadastro, edição e exclusão comunicam resultados corretos e respeitam os contratos já documentados; o tratamento da lista após editar é definido.
 - **Dependências:** Spec 01 — sessão autenticada; Spec 02 — vínculo com o MEI.

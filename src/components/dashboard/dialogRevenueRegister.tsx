@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode, useContext, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -21,6 +21,7 @@ import {
   SelectItem,
 } from "../ui/select";
 import { CreateRevenue } from "@/actions/documentsRevenue"
+import { DashboardContext } from "@/context";
 import { toast } from "sonner";
 
 interface RevanueProps {
@@ -34,6 +35,7 @@ const items = [
 ];
 
 export function RevenueRegister({ children }: RevanueProps) {
+  const { refreshRevenues } = useContext(DashboardContext);
   const [isOpen, setIsOpen] = useState(false)
   const [type, setType] = useState("")
 
@@ -44,6 +46,7 @@ export function RevenueRegister({ children }: RevanueProps) {
     
     if(result?.success){
       setIsOpen(false)
+      refreshRevenues();
       toast.success("Cadastrada com sucesso!")
     }else {
        toast.error(result?.message);
