@@ -74,7 +74,7 @@ As Server Actions em `src/actions/documentsRevenue.ts` implementam:
 - `UpdateRevenue(id, formData)`: `PUT /revenue` com `id`, `amount`, `date`, `type` e `note`; aplica a mesma validação e conversão monetária da criação.
 - `DeleteRevenue(id)`: `DELETE /revenue/remuv?revenue_id={id}`.
 
-Tipos de receita usados pela interface: `VENDA`, `SERVICO` e `OUTROS`. A conversão aceita números inteiros e valores brasileiros com até duas casas decimais, incluindo separador de milhar, e bloqueia valores inválidos ou não positivos antes da chamada à API. Na edição, `formatBrazilianCurrency` exibe o valor retornado pela API no formato brasileiro. Valores da tabela e do relatório são exibidos em BRL e datas em formato brasileiro. A tabela de histórico mostra a lista do período e tem campo de busca apenas visual, sem filtragem. Após cadastro, edição ou exclusão bem-sucedidos, a revisão compartilhada é incrementada e o resumo do Dashboard, histórico e relatório recarregam o período selecionado sem precisar atualizar a página. A edição abre dialog e mostra toast de sucesso/erro; a exclusão pede confirmação e remove o item da lista local após sucesso, mas não apresenta feedback de erro/sucesso nessa tabela. O resumo da página inicial e o relatório calculam os agregados a partir da resposta de `SearchHistory`.
+Tipos de receita usados pela interface: `VENDA`, `SERVICO` e `OUTROS`. A conversão aceita números inteiros e valores brasileiros com até duas casas decimais, incluindo separador de milhar, e bloqueia valores inválidos ou não positivos antes da chamada à API. Na edição, `formatBrazilianCurrency` exibe o valor retornado pela API no formato brasileiro. Valores da tabela e do relatório são exibidos em BRL e datas em formato brasileiro. A tabela de histórico mostra a lista do período e filtra, no cliente, pela descrição (`note`) já carregada. A comparação é um trecho contínuo, sem diferenciar maiúsculas e ignorando espaços nas pontas. O campo vazio mostra o mês inteiro. Trocar o mês limpa a busca; cadastro, edição e exclusão mantêm o texto. Sem resultados, a tabela exibe "Nenhuma receita encontrada para essa busca.". Após cadastro, edição ou exclusão bem-sucedidos, a revisão compartilhada é incrementada e o resumo do Dashboard, histórico e relatório recarregam o período selecionado sem precisar atualizar a página. A edição abre dialog e mostra toast de sucesso/erro; a exclusão pede confirmação e remove o item da lista local após sucesso, mas não apresenta feedback de erro/sucesso nessa tabela. O resumo da página inicial e o relatório calculam os agregados a partir da resposta de `SearchHistory`.
 
 ### Relatório
 
@@ -105,7 +105,6 @@ Em `/dashboard/settings`, os links de dados do MEI e contador funcionam. “Minh
 ## Pendências conhecidas
 
 - Conectar o atalho de relatório.
-- Implementar filtragem no campo de busca da tabela.
 - Integrar upload de documentos quando houver contrato de backend.
 - Implementar conta, exportação, plano, segurança e exclusão de conta quando definidos os fluxos e contratos.
 - Substituir status/alertas estáticos por dados reais quando disponíveis.

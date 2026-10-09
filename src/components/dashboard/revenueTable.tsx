@@ -60,6 +60,19 @@ const revenueTypeConfig = {
   },
 } as const;
 
+function normalizeSearchText(value: string) {
+  return value.trim().toLocaleLowerCase("pt-BR");
+}
+
+function noteMatchesSearch(note: string | null, query: string) {
+  const normalizedQuery = normalizeSearchText(query);
+
+  if (!normalizedQuery) return true;
+  if (!note) return false;
+
+  return note.toLocaleLowerCase("pt-BR").includes(normalizedQuery);
+}
+
 export function RevenueTable() {
   const { selectedDate, revenueRevision, refreshRevenues } =
     useContext(DashboardContext);
@@ -73,6 +86,12 @@ export function RevenueTable() {
   const [revenueToDelete, setRevenueToDelete] = useState<RevenueType | null>(
     null,
   );
+
+  const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    setSearchQuery("");
+  }, [selectedDate]);
 
   useEffect(() => {
     if (!selectedDate) return;
@@ -97,16 +116,27 @@ export function RevenueTable() {
     return revenueTypeConfig[type]?.label || "";
   };
 
+  const visibleRevenues = revenueData.filter((item) =>
+    noteMatchesSearch(item.note, searchQuery),
+  );
+  const hasActiveSearch = normalizeSearchText(searchQuery).length > 0;
+
   return (
     <main className="flex mx-auto flex-col gap-4 w-full max-w-5xl">
       <Card className="border-border shadow-sm bg-surface">
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle>Histórico de Receitas</CardTitle>
 
-          <div className="relative w-72">
+          <div className="relative w-full sm:w-72">
             <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 
-            <Input placeholder="Buscar receita..." className="pr-10" />
+            <Input
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Buscar pela descrição..."
+              aria-label="Buscar pela descrição"
+              className="pr-10"
+            />
           </div>
         </CardHeader>
 
@@ -129,7 +159,17 @@ export function RevenueTable() {
             </TableHeader>
 
             <TableBody>
-              {revenueData.map((item) => (
+              {hasActiveSearch && visibleRevenues.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={6}
+                    className="py-8 text-center font-normal whitespace-normal text-muted-foreground"
+                  >
+                    Nenhuma receita encontrada para essa busca.
+                  </TableCell>
+                </TableRow>
+              ) : null}
+              {visibleRevenues.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell>
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100">

@@ -44,7 +44,7 @@ O comportamento descrito reflete o frontend existente e os contratos registrados
 ## 6. Fora do escopo
 
 - Upload, armazenamento ou vínculo de documentos a receitas. A interface de cadastro de documentos não tem envio funcional nem persistência.
-- Busca/filtragem efetiva na tabela de receitas; o campo de busca é apenas visual.
+- Busca de receitas fora do mês selecionado, por valor, data, categoria ou identificador, e busca textual no backend.
 - Dados reais de pendências, conformidade, alertas ou status fiscal. Os componentes atuais são estáticos.
 - Gestão de conta, exportação de dados, plano, segurança e exclusão de conta. Os cartões e ações correspondentes não têm fluxo integrado.
 - Persistência de tema visual.
@@ -58,6 +58,7 @@ O comportamento descrito reflete o frontend existente e os contratos registrados
 - O formulário do contador exige nome, e-mail e telefone com DDD. O fluxo de contador depende de o MEI indicar que possui contador.
 - Uma receita contém valor, data e categoria; descrição é opcional. As categorias disponíveis são venda, serviço e outros.
 - A consulta mensal usa o período selecionado no dashboard, compartilhado entre o resumo, histórico e relatório.
+- A busca do histórico filtra no cliente a descrição das receitas já carregadas do mês selecionado. O texto é um trecho contínuo, sem diferenciar maiúsculas, ignorando espaços nas pontas. Trocar o mês limpa a busca. Cadastro, edição e exclusão mantêm o texto.
 - A interface pede confirmação antes de excluir uma receita. Após sucesso, remove o item da lista local.
 - Não há regra de limite anual, emissão fiscal, cálculo de imposto ou validação de obrigação fiscal implementada neste frontend.
 - Os contratos documentados para receitas são: criação em `POST /revenue`, listagem própria opcionalmente filtrada por mês e ano em `GET /revenues`, atualização completa em `PUT /revenue` e exclusão por `DELETE /revenue/remuv?revenue_id=...`.
@@ -204,7 +205,7 @@ Specs:
 - **Intenção (por quê):** Dar à pessoa uma forma consistente de registrar entradas financeiras e manter o histórico correto.
 - **Contexto:** A interface oferece formulário de cadastro, diálogo de edição e confirmação de exclusão. `endpoints.md` documenta os contratos atuais das quatro operações e seus parâmetros.
 - **Atores:** Pessoa autenticada responsável pelo MEI.
-- **Descrição do comportamento:** Para cadastrar, a pessoa informa valor, data, categoria e descrição opcional; após sucesso, recebe confirmação. Para editar, abre a receita selecionada, altera os campos e salva, recebendo confirmação ou erro. Para excluir, confirma a ação; após sucesso, o item é removido da lista exibida. Após qualquer cadastro, edição ou exclusão bem-sucedidos, a tabela, o resumo "Receita no mês" do Dashboard e o relatório recarregam os dados do período selecionado automaticamente, sem atualizar a página. A tabela não implementa busca efetiva.
+- **Descrição do comportamento:** Para cadastrar, a pessoa informa valor, data, categoria e descrição opcional; após sucesso, recebe confirmação. Para editar, abre a receita selecionada, altera os campos e salva, recebendo confirmação ou erro. Para excluir, confirma a ação; após sucesso, o item é removido da lista exibida. Após qualquer cadastro, edição ou exclusão bem-sucedidos, a tabela, o resumo "Receita no mês" do Dashboard e o relatório recarregam os dados do período selecionado automaticamente, sem atualizar a página. O texto da busca do histórico permanece e a lista recarregada continua filtrada por ele.
 - **Entradas e saídas:** Valor positivo, data válida, categoria (venda, serviço ou outros) e descrição opcional. Saída: receita criada/atualizada/excluída ou mensagem de erro.
 - **Dados/entidades envolvidos (conceitual):** Receita com valor, data, categoria e observação opcional, pertencente ao MEI da pessoa autenticada.
 - **Estados e transições:** Formulário → enviando → sucesso com confirmação/fechamento e atualização das consultas abertas; erro de validação ou API → mensagem e formulário disponível sem atualizar os dados. Exclusão solicitada → confirmação → removida após sucesso e atualização das consultas abertas, ou permanece em caso de falha.
@@ -230,7 +231,7 @@ Specs:
   - Dado que a API falha em qualquer operação, quando a ação termina, então o resultado não é apresentado como sucesso.
 - **Definição de pronto:** Cadastro, edição e exclusão comunicam resultados corretos e respeitam os contratos já documentados; o tratamento da lista após editar é definido.
 - **Dependências:** Spec 01 — sessão autenticada; Spec 02 — vínculo com o MEI.
-- **Fora do escopo desta spec:** Anexar documentos, emitir nota fiscal, calcular impostos, importar extratos ou implementar busca na tabela.
+- **Fora do escopo desta spec:** Anexar documentos, emitir nota fiscal, calcular impostos ou importar extratos. A busca por descrição pertence à Spec 04.
 
 ### Spec 04 — Período, histórico e relatório mensal
 
@@ -239,7 +240,7 @@ Specs:
 - **Intenção (por quê):** Ajudar a pessoa a acompanhar entradas do mês e revisar os lançamentos em uma visão resumida.
 - **Contexto:** Dashboard, histórico e relatório usam o período compartilhado. O seletor cobre janeiro de 2020 a dezembro de 2030. Os dados do relatório vêm da consulta de receitas do período.
 - **Atores:** Pessoa autenticada responsável pelo MEI.
-- **Descrição do comportamento:** O período começa no mês atual e sua escolha é mantida durante a sessão do navegador. Ao mudar o mês/ano, as telas que dependem do período consultam as receitas correspondentes. O dashboard exibe resumo. O histórico apresenta a lista mensal e ações disponíveis. O relatório exibe total, quantidade, subtotais e contagens por categoria, lista de receitas e estados de carregamento, erro e vazio. Os valores são exibidos em reais e datas em formato brasileiro. A busca visível no histórico não filtra resultados.
+- **Descrição do comportamento:** O período começa no mês atual e sua escolha é mantida durante a sessão do navegador. Ao mudar o mês/ano, as telas que dependem do período consultam as receitas correspondentes. O dashboard exibe resumo. O histórico apresenta a lista mensal e ações disponíveis. O relatório exibe total, quantidade, subtotais e contagens por categoria, lista de receitas e estados de carregamento, erro e vazio. Os valores são exibidos em reais e datas em formato brasileiro. No histórico, a pessoa pode digitar um trecho da descrição para filtrar na hora as receitas já carregadas daquele mês. A busca não consulta outro período nem outros campos. Campo vazio mostra o mês inteiro. Se nenhuma descrição contém o trecho, a tabela mantém o cabeçalho e informa que nenhuma receita foi encontrada. Trocar o mês limpa o texto. Sem descrição, a receita não aparece enquanto houver texto.
 - **Entradas e saídas:** Mês e ano selecionados. Saída: receitas do período, soma total, contagem geral e subtotais/contagens por categoria, ou estado vazio/erro.
 - **Dados/entidades envolvidos (conceitual):** Período mensal; receitas do período; totais agregados por categoria.
 - **Estados e transições:** Período selecionado → carregamento → dados exibidos; sem resultados → estado vazio; erro de consulta → mensagem/estado de erro. Alterar período inicia nova consulta.
@@ -248,19 +249,23 @@ Specs:
 - **Fluxo do usuário (passo a passo):**
   1. A pessoa autenticada escolhe um mês e ano disponíveis.
   2. O dashboard, histórico e relatório que estiverem abertos carregam o período selecionado.
-  3. A pessoa consulta lista e totais; ao mudar o período, o conteúdo é atualizado.
-  4. Em caso de erro ou ausência de registros, a tela comunica o estado correspondente.
-- **Casos de borda e erros:** Período sem receitas mostra estado vazio; carregamento mostra indicação visual; falha na consulta mostra erro; categoria desconhecida não deve quebrar a apresentação. `GET /revenues` aceita `month` e `year` juntos como filtros opcionais; sem ambos, lista todas as receitas do MEI autenticado. O backend documenta que converte os valores com `Number()` sem validar faixa ou formato.
+  3. A pessoa consulta lista e totais; ao mudar o período, o conteúdo é atualizado e a busca do histórico é limpa.
+  4. No histórico, pode digitar um trecho da descrição para ver só as receitas daquele mês cuja descrição contém o trecho.
+  5. Em caso de erro ou ausência de registros, a tela comunica o estado correspondente.
+- **Casos de borda e erros:** Período sem receitas mostra estado vazio; carregamento mostra indicação visual; falha na consulta mostra erro; categoria desconhecida não deve quebrar a apresentação. Busca só com espaços equivale a campo vazio. Maiúsculas não alteram o resultado; acentos precisam coincidir. Várias descrições podem bater e todas permanecem na tabela. Receita sem descrição fica oculta enquanto houver texto. Cadastro, edição e exclusão não limpam a busca; se a descrição editada deixar de conter o trecho, a linha sai da lista filtrada. `GET /revenues` aceita `month` e `year` juntos como filtros opcionais; sem ambos, lista todas as receitas do MEI autenticado. O backend documenta que converte os valores com `Number()` sem validar faixa ou formato.
 - **Impacto no existente:** Consolida a leitura das receitas e dirige o conteúdo do dashboard, histórico e relatório.
 - **Critérios de aceite (Dado/Quando/Então):**
   - Dado que a pessoa seleciona um mês dentro do intervalo, quando abre histórico ou relatório, então vê dados daquele período.
   - Dado que o período selecionado não tem receitas, quando a consulta termina, então a tela mostra estado vazio.
   - Dado que há receitas, quando o relatório termina de carregar, então total, quantidade e agrupamentos correspondem à lista exibida.
   - Dado que a consulta falha, quando a tela recebe o erro, então apresenta estado de erro em vez de tratar o resultado como lista vazia válida.
-  - Dado que a pessoa altera o mês, quando a nova consulta termina, então o conteúdo reflete o novo período.
+  - Dado que a pessoa altera o mês, quando a nova consulta termina, então o conteúdo reflete o novo período e o campo de busca está vazio.
+  - Dado que o mês tem receitas, quando a pessoa digita um trecho da descrição, então a tabela mostra na hora só as linhas cuja descrição contém esse trecho, sem diferenciar maiúsculas.
+  - Dado que o texto não está em nenhuma descrição, quando a pessoa digita, então o cabeçalho permanece e a tabela informa que nenhuma receita foi encontrada.
+  - Dado que a busca tem texto, quando uma receita é cadastrada, editada ou excluída, então o texto permanece e a lista atualizada continua filtrada.
 - **Definição de pronto:** Seleção mensal é compartilhada e os estados vazio, carregando, erro e dados calculados são coerentes nas telas dependentes.
 - **Dependências:** Spec 03 — receitas consultadas e operações de receitas; Spec 01 — acesso autenticado.
-- **Fora do escopo desta spec:** Busca por texto, filtros adicionais, exportação de relatório, comparações entre períodos e projeções financeiras.
+- **Fora do escopo desta spec:** Busca fora do mês selecionado, busca por valor, data, categoria ou identificador, busca textual no backend, normalização de acentos, exportação de relatório, comparações entre períodos e projeções financeiras.
 
 ## 14. Ordem recomendada de implementação
 
